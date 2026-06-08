@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate": "openapi-ts -i ../../_legacy/tests/resources/openapi.json -o src/generated --client fetch && echo 'export * from \"./services.gen\";' > src/generated/sdk.gen.ts",
+    "generate": "openapi-ts -i ../../_legacy/tests/resources/openapi.json -o src/generated --client fetch && node -e \"require('fs').writeFileSync('src/generated/sdk.gen.ts','export * from \\\"./services.gen\\\";\\n')\"",
     "dev": "run-s generate dev-only",
     "dev-only": "vite",
     "build": "run-s generate type-check build-only",
