@@ -28,12 +28,12 @@
             </v-list-item>
           </v-list>
           <v-divider></v-divider>
-          <tree-explorer />
+          <tree-explorer @select-dn="activeDn = $event" />
         </v-navigation-drawer>
 
         <!-- Main content: Entry editor -->
         <v-main>
-          <entry-editor />
+          <entry-editor :active-dn="activeDn" @update:active-dn="activeDn = $event" />
         </v-main>
       </v-container>
     </template>
@@ -41,12 +41,14 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useAuthStore } from './stores/auth';
 import LoginView from './views/LoginView.vue';
 import TreeExplorer from './components/TreeExplorer.vue';
-import EntryEditor from './components/EntryEditor.vue';
+import EntryEditor from './components/editor/EntryEditor.vue';
 
 const authStore = useAuthStore();
+const activeDn = ref<string>();
 </script>
 
 <style scoped>
