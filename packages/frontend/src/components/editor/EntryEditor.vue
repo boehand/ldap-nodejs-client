@@ -43,7 +43,7 @@
 
     <form id="entry" class="space-y-4 my-4" @submit.prevent="save" @reset="load(entry!.dn, undefined, undefined)"
       @focusin="onFocus">
-      <attribute-row v-for="key in keys" :key="key" :base-dn="props.baseDn" :attr="state.schema?.attr(key)!"
+      <attribute-row v-for="key in keys" :key="key" :base-dn="props.baseDn" :attr="state.schema?.attr(key) ?? new Attribute({ name: key })"
         :entry="entry" :values="entry.attrs[key]!" :changed="hasChanged(key)" :may="attributes('may').includes(key)"
         :must="attributes('must').includes(key)" @update="updateRow" @reload-form="load" @valid="valid(key, $event)"
         @show-modal="modal = $event" @show-attr="emit('show-attr', $event)" @show-oc="emit('show-oc', $event)" />
@@ -87,6 +87,7 @@ import NodeLabel from "../NodeLabel.vue";
 import PasswordChangeDialog from "./PasswordChangeDialog.vue";
 import RenameEntryDialog from "./RenameEntryDialog.vue";
 import { state } from "../../state";
+import { Attribute } from "../schema/schema";
 
 function unique(
   element: unknown,
@@ -111,7 +112,9 @@ const inputTags = ["BUTTON", "INPUT", "SELECT", "TEXTAREA"],
     return keys;
   }),
   structural = computed(() => {
-    const oc = entry.value?.attrs.objectClass!
+    const objectClasses = entry.value?.attrs?.objectClass;
+    if (!objectClasses || !state.schema) return "";
+    const oc = objectClasses
       .map((oc) => state.schema?.oc(oc as string))
       .filter((oc) => oc && oc.structural)[0];
     return oc ? oc.name! : "";
@@ -277,7 +280,9 @@ async function changePassword(_oldPass: string, newPass: string) {
 }
 
 function attributes(kind: "must" | "may"): string[] {
-  const attrs = entry.value!.attrs.objectClass!
+  const objectClasses = entry.value?.attrs?.objectClass;
+  if (!objectClasses || !state.schema) return [];
+  const attrs = objectClasses
     .filter((oc) => oc && oc != "top")
     .map((oc) => state.schema?.oc(oc))
     .flatMap((oc) => (oc ? oc.$collect(kind) : []))
