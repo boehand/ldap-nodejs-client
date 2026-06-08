@@ -1,0 +1,52 @@
+{
+  "name": "@ldap-ui/frontend",
+  "version": "1.0.0",
+  "description": "LDAP UI - Vue.js Frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "run-s type-check build-only",
+    "build-only": "vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --build",
+    "lint": "eslint . --ext .vue,.ts,.tsx",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@vueuse/core": "latest",
+    "font-awesome": "^4.7.0",
+    "vue": "latest",
+    "vuetify": "^3.5.0",
+    "@mdi/js": "^7.4.0"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "latest",
+    "@tsconfig/node24": "latest",
+    "@types/node": "latest",
+    "@vitejs/plugin-vue": "latest",
+    "@vue/eslint-config-prettier": "latest",
+    "@vue/eslint-config-typescript": "latest",
+    "@vue/tsconfig": "latest",
+    "@vue/test-utils": "latest",
+    "@vitest/coverage-v8": "latest",
+    "autoprefixer": "latest",
+    "eslint": "latest",
+    "eslint-plugin-vue": "latest",
+    "npm-run-all2": "latest",
+    "prettier": "latest",
+    "tailwindcss": "^3.4.19",
+    "typescript": "latest",
+    "vite": "latest",
+    "vite-plugin-compression": "latest",
+    "vite-plugin-vuetify": "latest",
+    "vitest": "latest",
+    "vue-tsc": "latest"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

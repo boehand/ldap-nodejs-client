@@ -10,8 +10,10 @@ build
 dist
 statics
 
-# local env files
-.env*
+# local env files (but keep .env.example)
+.env
+.env.local
+.env.*.local
 
 # Log files
 npm-debug.log*
