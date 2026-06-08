@@ -50,9 +50,8 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef } from "vue";
 import Modal from "../ui/Modal.vue";
-import { postCheckPassword } from "../../generated/sdk.gen";
-import { getWhoAmI } from "../../generated/sdk.gen";
-import type { Entry } from "../../generated/types.gen";
+import { fetchWhoAmI, ldapApi } from "../../api/ldap-client";
+import type { Entry } from "../../api/ldap-client";
 
 const props = defineProps<{
     entry: Entry;
@@ -85,10 +84,10 @@ async function init() {
   oldPassword.value = newPassword.value = repeated.value = "";
   passwordOk.value = undefined;
 
-  // Get the DN of the current user
-  const whoami = await getWhoAmI();
-  if (whoami) {
-    user.value = whoami;
+  try {
+    user.value = await fetchWhoAmI();
+  } catch {
+    // ignore
   }
 }
 
@@ -105,12 +104,14 @@ async function check() {
     passwordOk.value = undefined;
     return;
   }
-  const result = await postCheckPassword({
-    dn: props.entry.dn,
-    requestBody: oldPassword.value,
-  });
-
-  passwordOk.value = result;
+  try {
+    const resp = await ldapApi.post<{ valid: boolean }>(`/entry/${encodeURIComponent(props.entry.dn)}/check-password`, {
+      password: oldPassword.value,
+    });
+    passwordOk.value = resp.success && resp.data?.valid === true;
+  } catch {
+    passwordOk.value = false;
+  }
 }
 
 async function onOk() {

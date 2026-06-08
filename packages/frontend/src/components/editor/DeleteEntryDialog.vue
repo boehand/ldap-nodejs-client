@@ -24,15 +24,14 @@ import { computed, ref } from "vue";
 import { DN } from "../schema/schema";
 import Modal from "../ui/Modal.vue";
 import NodeLabel from "../NodeLabel.vue";
-import type { TreeItem } from "../../generated/types.gen";
-import { getSubtree } from "../../generated/sdk.gen";
+import { ldapApi } from "../../api/ldap-client";
 
 const props = defineProps<{
   dn: string;
   modal?: string;
   returnTo?: string;
 }>(),
-  subtree = ref<TreeItem[]>([]),
+  subtree = ref<any[]>([]),
   emit = defineEmits<{
     ok: [dn: string];
     "update:modal": [];
@@ -42,7 +41,8 @@ const props = defineProps<{
 // List subordinate elements to be deleted
 async function init() {
   try {
-    subtree.value = await getSubtree({ rootDn: props.dn });
+    const resp = await ldapApi.get<any[]>(`/subtree/${encodeURIComponent(props.dn)}`);
+    if (resp.success && resp.data) subtree.value = resp.data;
   } catch (e) {
     // ignore
   }

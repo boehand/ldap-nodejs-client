@@ -80,20 +80,13 @@ import CopyEntryDialog from "./CopyEntryDialog.vue";
 import DeleteEntryDialog from "./DeleteEntryDialog.vue";
 import DiscardEntryDialog from "./DiscardEntryDialog.vue";
 import DropdownMenu from "../ui/DropdownMenu.vue";
-import type { Entry, HTTPValidationError } from "../../generated/types.gen";
+import type { Entry } from "../../api/ldap-client";
+import { fetchEntry, saveEntry, removeEntry, renameEntry as apiRenameEntry, changeEntryPassword } from "../../api/ldap-client";
 import NewEntryDialog from "./NewEntryDialog.vue";
 import NodeLabel from "../NodeLabel.vue";
 import PasswordChangeDialog from "./PasswordChangeDialog.vue";
 import RenameEntryDialog from "./RenameEntryDialog.vue";
 import { state } from "../../state";
-import {
-  getEntry,
-  postEntry,
-  putEntry,
-  postRenameEntry,
-  deleteEntry,
-  postChangePassword,
-} from "../../generated/sdk.gen";
 
 function unique(
   element: unknown,
@@ -213,9 +206,9 @@ async function load(dn?: string, changed?: string[], focused?: string) {
   }
   let loadedEntry: Entry;
   try {
-    loadedEntry = await getEntry({ dn });
+    loadedEntry = await fetchEntry(dn);
   } catch (e: any) {
-    showError(e?.body ?? e?.message ?? String(e));
+    showError(e?.message ?? String(e));
     return;
   }
   entry.value = loadedEntry;
@@ -240,19 +233,9 @@ async function save() {
   entry.value!.changed = [];
   let changed: string[] = [];
   try {
-    if (entry.value!.isNew) {
-      changed = await putEntry({
-        dn: entry.value!.dn,
-        requestBody: entry.value!.attrs,
-      });
-    } else {
-      changed = await postEntry({
-        dn: entry.value!.dn,
-        requestBody: entry.value!.attrs,
-      });
-    }
+    changed = await saveEntry(entry.value!.dn, entry.value!.attrs);
   } catch (e: any) {
-    showError(e?.body ?? e?.message ?? String(e));
+    showError(e?.message ?? String(e));
     return;
   }
 
@@ -264,25 +247,18 @@ async function save() {
 
 async function renameEntry(rdn: string) {
   try {
-    await postRenameEntry({
-      dn: entry.value!.dn,
-      requestBody: rdn,
-    });
+    const newDn = await apiRenameEntry(entry.value!.dn, rdn);
+    emit("update:activeDn", newDn);
   } catch (e: any) {
-    showError(e?.body ?? e?.message ?? String(e));
-    return;
+    showError(e?.message ?? String(e));
   }
-
-  const dnparts = entry.value!.dn.split(",");
-  dnparts.splice(0, 1, rdn);
-  emit("update:activeDn", dnparts.join(","));
 }
 
 async function deleteEntryByDn(dn: string) {
   try {
-    await deleteEntry({ dn });
+    await removeEntry(dn);
   } catch (e: any) {
-    showError(e?.body ?? e?.message ?? String(e));
+    showError(e?.message ?? String(e));
     return;
   }
   document.title = "Directory";
@@ -290,16 +266,13 @@ async function deleteEntryByDn(dn: string) {
   emit("update:activeDn", "-" + dn);
 }
 
-async function changePassword(oldPass: string, newPass: string) {
+async function changePassword(_oldPass: string, newPass: string) {
   try {
-    await postChangePassword({
-      dn: entry.value!.dn,
-      requestBody: { old: oldPass, new1: newPass },
-    });
+    await changeEntryPassword(entry.value!.dn, newPass);
     entry.value!.attrs.userPassword = [newPass];
     entry.value!.changed = ["userPassword"];
   } catch (e: any) {
-    showError(e?.body ?? e?.message ?? String(e));
+    showError(e?.message ?? String(e));
   }
 }
 

@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { ref, useTemplateRef } from "vue";
 import Modal from "../ui/Modal.vue";
-import type { Entry } from "../../generated/types.gen";
+import type { Entry } from "../../api/ldap-client";
 
 const props = defineProps<{
     entry: Entry;

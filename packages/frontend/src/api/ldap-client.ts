@@ -175,3 +175,96 @@ class LdapApiClient {
 }
 
 export const ldapApi = new LdapApiClient();
+
+// Entry type matching the frontend's expected format
+export interface Entry {
+  dn: string;
+  attrs: Record<string, string[]>;
+  autoFilled: string[];
+  binary: string[];
+  changed: string[];
+  isNew?: boolean;
+}
+
+// Wrapper functions matching the signatures used by editor components.
+// These replace the generated SDK functions and use session-cookie auth.
+
+export async function fetchEntry(dn: string): Promise<Entry> {
+  const resp = await ldapApi.getEntry(dn);
+  if (!resp.success || !resp.data) {
+    throw new Error(resp.error?.message || 'Failed to load entry');
+  }
+  return {
+    dn: resp.data.dn,
+    attrs: resp.data.attributes,
+    autoFilled: [],
+    binary: [],
+    changed: [],
+    isNew: false,
+  };
+}
+
+export async function saveEntry(
+  dn: string,
+  attributes: Record<string, string | string[] | null>
+): Promise<string[]> {
+  const resp = await ldapApi.modifyEntry(dn, attributes);
+  if (!resp.success) {
+    throw new Error(resp.error?.message || 'Failed to save entry');
+  }
+  return Object.keys(attributes);
+}
+
+export async function createEntry(
+  parentDn: string,
+  rdn: string,
+  objectClass: string[],
+  attributes: Record<string, string | string[]>
+): Promise<string> {
+  const resp = await ldapApi.createEntry(parentDn, rdn, objectClass, attributes);
+  if (!resp.success || !resp.data) {
+    throw new Error(resp.error?.message || 'Failed to create entry');
+  }
+  return resp.data.dn;
+}
+
+export async function removeEntry(dn: string): Promise<void> {
+  const resp = await ldapApi.deleteEntry(dn);
+  if (!resp.success) {
+    throw new Error(resp.error?.message || 'Failed to delete entry');
+  }
+}
+
+export async function renameEntry(dn: string, newRdn: string): Promise<string> {
+  const resp = await ldapApi.renameEntry(dn, newRdn);
+  if (!resp.success || !resp.data) {
+    throw new Error(resp.error?.message || 'Failed to rename entry');
+  }
+  return resp.data.newDn;
+}
+
+export async function changeEntryPassword(
+  dn: string,
+  newPassword: string
+): Promise<void> {
+  const resp = await ldapApi.changePassword(dn, newPassword);
+  if (!resp.success) {
+    throw new Error(resp.error?.message || 'Failed to change password');
+  }
+}
+
+export async function fetchSchema(): Promise<any> {
+  const resp = await ldapApi.getSchema();
+  if (!resp.success || !resp.data) {
+    throw new Error(resp.error?.message || 'Failed to load schema');
+  }
+  return resp.data;
+}
+
+export async function fetchWhoAmI(): Promise<string> {
+  const resp = await ldapApi.get<{ bindDn: string }>('/auth/whoami');
+  if (!resp.success || !resp.data) {
+    throw new Error(resp.error?.message || 'Failed to get user info');
+  }
+  return resp.data.bindDn;
+}
