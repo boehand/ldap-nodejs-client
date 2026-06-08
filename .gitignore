@@ -3,6 +3,7 @@
 .activate
 __pycache__
 *.egg-info
+package-lock.json
 
 .DS_Store
 node_modules
