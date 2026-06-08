@@ -7,11 +7,12 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig({
   plugins: [vue(), viteCompression()],
 
-  base: "./",
+  base: "/",
 
   build: {
     chunkSizeWarningLimit: 600,
-    outDir: "backend/ldap_ui/statics",
+    outDir: "dist",
+    emptyOutDir: true,
   },
 
   resolve: {
@@ -21,10 +22,15 @@ export default defineConfig({
   },
 
   server: {
+    // Proxy /api requests to Node.js backend during development
     proxy: {
-      "/api/": {
-        target: "http://127.0.0.1:5000/",
+      "/api": {
+        target: "http://127.0.0.1:5000",
+        changeOrigin: true,
+        // Don't rewrite the /api prefix
       },
     },
+    // Port for dev server
+    port: 5173,
   },
 });
