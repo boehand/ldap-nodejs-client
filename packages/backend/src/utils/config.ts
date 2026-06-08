@@ -38,7 +38,7 @@ export function loadConfig(): LdapConfig {
     port: getEnvNumber('PORT', 5000),
     nodeEnv: (getEnvVar('NODE_ENV', 'development') || 'development') as any,
     logLevel: getEnvVar('LOG_LEVEL', 'info') || 'info',
-    sessionSecret: getEnvVar('SESSION_SECRET') || 'change-me-in-production',
+    sessionSecret: getEnvVar('SESSION_SECRET') || 'change-me-in-production-not-secure!',
     sessionTtl: getEnvNumber('SESSION_TTL', 24 * 60 * 60 * 1000), // 24 hours
     defaultLdapUrl: getEnvVar('LDAP_URL'),
     defaultBaseDn: getEnvVar('BASE_DN'),
