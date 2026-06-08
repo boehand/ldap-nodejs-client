@@ -40,7 +40,7 @@
     "typescript": "5.x",
     "vite": "5.x",
     "vite-plugin-compression": "0.5.x",
-    "vite-plugin-vuetify": "1.x",
+    "vite-plugin-vuetify": "2.x",
     "vitest": "1.x",
     "vue-tsc": "1.x"
   },
