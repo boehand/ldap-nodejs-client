@@ -43,12 +43,12 @@
     "crypto-js": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "^latest",
-    "@types/ldapjs": "^1.0.0",
-    "@types/crypto-js": "^4.0.0",
+    "@types/node": "latest",
+    "@types/ldapjs": "1.0.x",
+    "@types/crypto-js": "4.x",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
-    "esbuild": "^0.20.0",
+    "esbuild": "0.20.x",
     "eslint": "latest",
     "tsx": "latest",
     "typescript": "latest",
