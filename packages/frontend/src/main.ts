@@ -34,16 +34,14 @@ const vuetify = createVuetify({
   },
   icons: {
     defaultSet: 'mdi',
-    values: {
-      mdi: {
-        menu: mdiMenu,
-        close: mdiClose,
-        chevronRight: mdiChevronRight,
-        chevronDown: mdiChevronDown,
-        plus: mdiPlus,
-        delete: mdiDelete,
-        pencil: mdiPencil,
-      },
+    aliases: {
+      menu: mdiMenu,
+      close: mdiClose,
+      chevronRight: mdiChevronRight,
+      chevronDown: mdiChevronDown,
+      plus: mdiPlus,
+      delete: mdiDelete,
+      pencil: mdiPencil,
     },
   },
 });
@@ -52,7 +50,7 @@ const vuetify = createVuetify({
 const pinia = createPinia();
 
 app.use(pinia);
-app.use(vuetify);
+app.use(vuetify as any);
 
 app.mount('#app');
 

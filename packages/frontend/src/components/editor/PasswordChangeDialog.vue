@@ -86,9 +86,9 @@ async function init() {
   passwordOk.value = undefined;
 
   // Get the DN of the current user
-  const response = await getWhoAmI();
-  if (response.data) {
-    user.value = response.data;
+  const whoami = await getWhoAmI();
+  if (whoami) {
+    user.value = whoami;
   }
 }
 
@@ -105,12 +105,12 @@ async function check() {
     passwordOk.value = undefined;
     return;
   }
-  const response = await postCheckPassword({
-    path: { dn: props.entry.dn },
-    body: oldPassword.value,
+  const result = await postCheckPassword({
+    dn: props.entry.dn,
+    requestBody: oldPassword.value,
   });
 
-  passwordOk.value = response.data;
+  passwordOk.value = result;
 }
 
 async function onOk() {

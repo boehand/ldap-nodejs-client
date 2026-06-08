@@ -124,10 +124,12 @@ async function clicked(dn: DN) {
 // Reload the subtree at entry with given DN
 async function reload(dn?: string) {
   if (!dn) return;
-  const response = await getTree({ path: { basedn: dn }});
-  if (!response.data) return;
-
-  const data = response.data;
+  let data: TreeItem[];
+  try {
+    data = await getTree({ basedn: dn });
+  } catch (e) {
+    return;
+  }
   data.sort((a: TreeItem, b: TreeItem) =>
     a.dn.toLowerCase().localeCompare(b.dn.toLowerCase())
   );

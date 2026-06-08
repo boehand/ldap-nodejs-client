@@ -1,4 +1,5 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance } from 'fastify';
+import '../../types/index.js';
 import { LdapClient } from '../../ldap/client.js';
 import { ValidationError } from '../../utils/errors.js';
 import { getLogger } from '../../utils/logger.js';
@@ -32,7 +33,7 @@ export async function registerSearchRoutes(app: FastifyInstance): Promise<void> 
   }>(
     '/api/search',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { baseDn, q, filter, scope, sizeLimit } = request.query;
 
       if (!baseDn) {
@@ -102,7 +103,7 @@ export async function registerSearchRoutes(app: FastifyInstance): Promise<void> 
   }>(
     '/api/search/advanced',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { baseDn, filter, attributes, scope, sizeLimit } = request.body;
 
       if (!baseDn || !filter) {

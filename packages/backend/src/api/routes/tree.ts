@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import '../../types/index.js';
 import { LdapClient } from '../../ldap/client.js';
 import { NotFoundError, ValidationError } from '../../utils/errors.js';
 import { getLogger } from '../../utils/logger.js';
@@ -23,7 +24,7 @@ export async function registerTreeRoutes(app: FastifyInstance): Promise<void> {
     Querystring: { scope?: 'one' | 'sub' };
   }>(
     '/api/tree/:baseDn',
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { baseDn } = request.params;
       const scope = request.query.scope || 'one';
       const decodedBaseDn = decodeURIComponent(baseDn);
@@ -93,7 +94,7 @@ export async function registerTreeRoutes(app: FastifyInstance): Promise<void> {
    * GET /api/tree/root
    * Get root DSE (directory root)
    */
-  app.get('/api/tree/root', async (request: FastifyRequest, reply: FastifyReply) => {
+  app.get('/api/tree/root', async (request, reply) => {
     // Allow anonymous access
     const client = new LdapClient(request.session?.ldapUrl || '');
 

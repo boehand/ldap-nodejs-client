@@ -5,8 +5,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "generate": "openapi-ts -i ../../_legacy/tests/resources/openapi.json -o src/generated --client fetch && echo 'export * from \"./services.gen\";' > src/generated/sdk.gen.ts",
     "dev": "vite",
-    "build": "run-s type-check build-only",
+    "build": "run-s generate type-check build-only",
     "build-only": "vite build",
     "preview": "vite preview",
     "type-check": "vue-tsc --build",
@@ -15,10 +16,11 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@vueuse/core": "10.x",
+    "@vueuse/core": "11.x",
+    "pinia": "2.x",
     "font-awesome": "4.7.x",
-    "vue": "3.4.x",
-    "vuetify": "3.5.x",
+    "vue": "3.5.x",
+    "vuetify": "3.7.x",
     "@mdi/js": "7.4.x"
   },
   "devDependencies": {
@@ -28,7 +30,7 @@
     "@vitejs/plugin-vue": "5.x",
     "@vue/eslint-config-prettier": "9.x",
     "@vue/eslint-config-typescript": "13.x",
-    "@vue/tsconfig": "0.5.x",
+    "@vue/tsconfig": "0.7.x",
     "@vue/test-utils": "2.4.x",
     "@vitest/coverage-v8": "1.x",
     "autoprefixer": "10.x",
@@ -42,7 +44,7 @@
     "vite-plugin-compression": "0.5.x",
     "vite-plugin-vuetify": "2.x",
     "vitest": "1.x",
-    "vue-tsc": "1.x"
+    "vue-tsc": "2.x"
   },
   "browserslist": [
     "> 1%",

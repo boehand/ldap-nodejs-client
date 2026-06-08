@@ -43,14 +43,17 @@ async function onOk(evt: Event) {
   const target = evt.target as HTMLInputElement;
   if (!target?.files) return;
 
-  const response = await putBlob({
-    path: { attr: props.attr!, index: 0, dn: props.dn },
-    body: { blob: target.files[0]! },
-  });
-
-  if (!response.error) {
+  try {
+    await putBlob({
+      attr: props.attr!,
+      index: 0,
+      dn: props.dn,
+      formData: { blob: target.files[0]! as any },
+    });
     emit("update:modal");
     emit("ok", props.dn, [props.attr!]);
+  } catch (e) {
+    // ignore
   }
 }
 </script>

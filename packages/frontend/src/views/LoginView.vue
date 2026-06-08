@@ -17,16 +17,16 @@
                   placeholder="ldap://localhost:389"
                   type="url"
                   required
-                  :items="savedUrls"
+                  :items="authStore.savedUrls"
                   clearable
                   class="mb-4"
                 ></v-text-field>
 
                 <!-- Or show URL list if exists -->
                 <v-select
-                  v-if="savedUrls.length > 0"
+                  v-if="authStore.savedUrls.length > 0"
                   v-model="selectedUrl"
-                  :items="savedUrls"
+                  :items="authStore.savedUrls"
                   label="Recent Servers"
                   clearable
                   class="mb-4"

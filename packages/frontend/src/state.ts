@@ -40,8 +40,8 @@ class State {
 export const state = reactive(new State());
 export async function initState() {
   // Load the schema
-  const schemaResponse = await getSchema();
-  if (schemaResponse.data) {
-    state.schema = new LdapSchema(schemaResponse.data);
+  const schema = await getSchema();
+  if (schema) {
+    state.schema = new LdapSchema(schema);
   }
 }

@@ -58,24 +58,28 @@ export interface LdapErrorInfo {
   ldapCode?: number;
 }
 
-// Fastify type augmentation
-declare global {
-  namespace Fastify {
-    interface Session {
-      bindDn: string;
-      ldapUrl: string;
-      encryptedPassword: string;
-      encryptedAt: number;
-      expiresAt: number;
-      savedUrls?: string[];
-    }
+// Fastify module augmentation
+declare module '@fastify/session' {
+  interface FastifySessionObject {
+    bindDn: string;
+    ldapUrl: string;
+    encryptedPassword: string;
+    encryptedAt: number;
+    expiresAt: number;
+    savedUrls?: string[];
+  }
+}
 
-    interface FastifyRequest {
-      ldapCreds?: {
-        bindDn: string;
-        password: string;
-        ldapUrl: string;
-      };
-    }
+declare module 'fastify' {
+  interface FastifyRequest {
+    ldapCreds?: {
+      bindDn: string;
+      password: string;
+      ldapUrl: string;
+    };
+  }
+
+  interface FastifyInstance {
+    authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
 }

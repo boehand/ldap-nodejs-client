@@ -30,7 +30,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import { ldapApi, type TreeNode } from '../api/ldap-client';
+import { ldapApi, type TreeNode, type ApiResponse } from '../api/ldap-client';
 
 const authStore = useAuthStore();
 
@@ -58,9 +58,9 @@ async function loadRoots() {
 
   loading.value = true;
   try {
-    const response = await ldapApi.get('/tree/root');
+    const response = await ldapApi.get('/tree/root') as ApiResponse<{ namingContexts?: string[] }>;
     if (response.success && response.data?.namingContexts) {
-      const baseDns = response.data.namingContexts as string[];
+      const baseDns = response.data.namingContexts;
 
       // Load children for each naming context
       for (const baseDn of baseDns) {

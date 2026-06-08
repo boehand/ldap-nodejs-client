@@ -41,7 +41,11 @@ function upload(evt: Event) {
 async function onOk() {
   if (!ldifData.value) return;
   emit("update:modal");
-  const response = await putLdif({ body: new Blob([ldifData.value]) });
-  if (!response.error) emit("ok");
+  try {
+    await putLdif({ requestBody: new Blob([ldifData.value]) });
+    emit("ok");
+  } catch (e) {
+    // ignore
+  }
 }
 </script>
