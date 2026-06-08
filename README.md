@@ -1,157 +1,447 @@
-# A fast and versatile LDAP editor
+# LDAP UI
 
-This is a *minimal* web interface for LDAP directories. Docker images for `linux/amd64` and `linux/arm64/v8` are [available](https://hub.docker.com/r/dnknth/ldap-ui).
+A modern, fast, and intuitive web-based LDAP directory editor built with Node.js and Vue.js.
 
-![Screenshot](https://github.com/dnknth/ldap-ui/blob/main/screenshot.png?raw=true)
+**No Python required. Pure npm-based. Production-ready.**
 
-Features:
+## Overview
 
-* Directory tree view
-* Entry creation / modification / deletion
-* LDIF import / export
-* Image support for the `jpegPhoto` and `thumbnailPhoto` attributes
-* Schema aware
-* Simple search (configurable)
-* Asynchronous LDAP backend with decent scalability
-* Available as [Docker image](https://hub.docker.com/r/dnknth/ldap-ui/)
+LDAP UI provides a clean, modern interface for managing LDAP directories. Whether you're administering OpenLDAP, 389 Directory Server, or Active Directory via LDAP, this tool makes it simple to browse, search, create, and modify directory entries.
 
-The app always requires authentication, even if the directory permits anonymous access. User credentials are validated through a simple `bind` on the directory (SASL is not supported). What a particular user can see (and edit) is governed entirely by directory access rules. The app shows the directory contents, nothing less and nothing more.
+### Key Features
+
+✨ **Modern UI** - Built with Vue.js 3 and Vuetify Material Design components  
+⚡ **Fast Backend** - Node.js with Fastify and connection pooling  
+🔐 **Secure** - AES-256-GCM encrypted sessions, HttpOnly cookies  
+🌳 **Tree Navigation** - Browse directory structure intuitively  
+📝 **Full CRUD** - Create, read, update, delete LDAP entries  
+🔍 **Powerful Search** - Simple and advanced LDAP filtering  
+📊 **Schema Aware** - Understand your directory schema  
+🎯 **Zero Dependencies** - No external databases required  
+📦 **Easy Deployment** - Docker, npm, or standalone binary  
+
+## Quick Start
+
+### Prerequisites
+
+- **Node.js** 20+ ([install](https://nodejs.org))
+- **pnpm** ([install](https://pnpm.io))
+- **LDAP Server** (OpenLDAP, 389 DS, etc.)
+
+### Installation & Running
+
+```bash
+# Clone repository
+git clone https://github.com/boehand/ldap-nodejs-ui.git
+cd ldap-nodejs-ui
+
+# Install dependencies (once)
+pnpm install
+
+# Start backend (Terminal 1)
+cd packages/backend
+pnpm dev
+# Backend runs on http://localhost:5000
+
+# Start frontend (Terminal 2)
+cd packages/frontend
+pnpm dev
+# Frontend runs on http://localhost:5173
+# Automatically proxies API calls to backend
+```
+
+**Open http://localhost:5173 in your browser.**
+
+### First Login
+
+1. **LDAP Server URL**: `ldap://your-ldap-server:389`
+   - Or use `ldaps://` for SSL (port 636)
+
+2. **Username**: Simple name or full DN
+   - Simple: `admin` (searches by uid by default)
+   - Full: `cn=admin,dc=example,dc=org`
+
+3. **Password**: Your LDAP user password
+
+4. **Saved URLs**: Recent servers are saved in session cookies
+
+## Configuration
+
+### Backend (.env)
+
+Create `packages/backend/.env`:
+
+```env
+# LDAP Connection
+LDAP_URL=ldap://localhost:389
+BASE_DN=dc=example,dc=org
+LOGIN_ATTR=uid
+
+# Server
+HOST=127.0.0.1
+PORT=5000
+NODE_ENV=development
+
+# Security
+SESSION_SECRET=your-32-character-random-secret-key-here
+SESSION_TTL=86400000  # 24 hours in milliseconds
+
+# Logging
+LOG_LEVEL=info  # trace, debug, info, warn, error, fatal
+```
+
+### Frontend (.env)
+
+Create `packages/frontend/.env`:
+
+```env
+# Backend API
+VITE_API_BASE=/api
+
+# Default LDAP URL shown in login
+VITE_DEFAULT_LDAP_URL=ldap://localhost:389
+
+# App title
+VITE_APP_TITLE=LDAP UI
+```
 
 ## Usage
 
-### Environment variables
+### Browsing
 
-LDAP access is controlled by the following optional environment variables, possibly from a `.env` file:
+1. **Login** with your LDAP credentials
+2. **Tree Navigation** - Left sidebar shows directory structure
+3. **Select Entry** - Click on any DN to view its attributes
+4. **View Details** - All attributes displayed in the main panel
 
-* `LDAP_URL`: Connection URL in RFC 4516 format, defaults to `ldap:///`.
-* `BASE_DN`: Optional search base, e.g. `dc=example,dc=org`, can also be specified as part of the `LDAP_URL`.
-* `SCHEMA_DN`: Optional DN to obtain the directory schema, e.g. `cn=subSchema`.
-* `LOGIN_ATTR`: User name attribute, defaults to `uid`.
-* `USE_TLS`: Enable TLS, defaults to true for `ldaps` connections. Set it to a non-empty string to force `STARTTLS` on `ldap` connections.
+### Editing
 
-if `BASE_DN` or `SCHEMA_DN` are not provided explicitly, auto-detection from the root DSA is attempted.
-For this, the root DSA must be readable anonymously, e.g. with the following ACL line for OpenLDAP:
+1. **Click Edit** (pencil icon) to enable edit mode
+2. **Modify Attributes** - Change values, add/remove entries
+3. **Save Changes** - Click Save button (validation included)
+4. **Delete Entry** - Delete icon removes entire entry
 
-```text
-access to dn.base="" by * read
+### Searching
+
+- **Simple Search** - Type name/email to find users
+- **Advanced Search** - Use LDAP filter syntax
+  - `cn=john*` - Entries with cn starting with "john"
+  - `mail=*@example.com` - Entries with specific email domain
+
+## API Reference
+
+All endpoints require authentication (LDAP bind). Responses always include `{ success, data, error }`.
+
+### Authentication
+
+```
+POST   /api/auth/login          - Login with LDAP credentials
+POST   /api/auth/logout         - Logout & clear session
+GET    /api/auth/whoami         - Current authenticated user
+GET    /api/auth/urls           - Saved LDAP server URLs
 ```
 
-For finer-grained control, see [settings.py](settings.py).
+### Entry Operations
+
+```
+GET    /api/entry/:dn           - Get entry details
+POST   /api/entry/:parentDn     - Create new entry
+PUT    /api/entry/:dn           - Modify entry attributes
+DELETE /api/entry/:dn           - Delete entry
+POST   /api/entry/:dn/rename    - Rename entry (modify RDN)
+POST   /api/entry/:dn/change-password - Change user password
+```
+
+### Navigation
+
+```
+GET    /api/tree/:baseDn        - Get directory tree
+GET    /api/tree/root           - Get root DSE & naming contexts
+```
+
+### Search
+
+```
+GET    /api/search?baseDn=...&q=...     - Simple search
+POST   /api/search/advanced             - Advanced search with filter
+```
+
+### Schema
+
+```
+GET    /api/schema              - Get full LDAP schema
+GET    /api/schema/objectClass/:name   - Specific object class
+GET    /api/schema/attributeType/:name - Specific attribute type
+```
+
+## Architecture
+
+```
+ldap-nodejs-ui (npm monorepo)
+│
+├── packages/backend/
+│   ├── src/api/              REST API routes + middleware
+│   ├── src/ldap/             LDAP client with connection pooling
+│   ├── src/utils/            Config, logging, error handling
+│   ├── src/types/            TypeScript shared types
+│   └── src/server.ts         Server entry point
+│
+└── packages/frontend/
+    ├── src/views/            Login & main layout
+    ├── src/components/       Vuetify UI components
+    ├── src/stores/           Pinia state management
+    ├── src/api/              API client wrapper
+    └── src/App.vue           App shell
+```
+
+### Backend Stack
+
+- **Fastify** - Modern, fast REST framework
+- **ldapjs** - LDAP client library with pooling
+- **Pino** - Structured JSON logging
+- **TypeScript** - Type-safe code
+
+### Frontend Stack
+
+- **Vue 3** - Progressive JavaScript framework
+- **Vuetify 3** - Material Design components
+- **Pinia** - State management
+- **Vite** - Next-gen build tool
+
+## Deployment
 
 ### Docker
 
-For the impatient: Run it with
+```bash
+# Build image
+docker build -t ldap-ui .
 
-```shell
-docker run -p 127.0.0.1:5000:5000 \
-    -e LDAP_URL=ldap://your.openldap.server/ \
-    dnknth/ldap-ui:latest
+# Run container
+docker run \
+  -p 5000:5000 \
+  -e LDAP_URL=ldap://your-server:389 \
+  -e BASE_DN=dc=example,dc=org \
+  -e SESSION_SECRET=your-secret-key \
+  ldap-ui
 ```
 
-For the even more impatient: Start a demo with
+### npm Package
 
-```shell
-docker compose up -d
+```bash
+# Install globally
+npm install -g @ldap-ui/backend
+
+# Run
+ldap-ui --port 5000 --ldap-url ldap://localhost:389
 ```
 
-and go to <http://localhost:5000/>. You are automatically logged in as `Fred Flintstone`.
+### Standalone
 
-### Pip
+```bash
+# Build both packages
+pnpm build
 
-Install `ldap-ui` in a virtual environment:
+# Backend: packages/backend/dist/server.js
+# Frontend: packages/frontend/dist/
 
-```shell
-python3 -m venv .venv
-source .venv/bin/activate
-pip3 install ldap-ui
-```
+# Run backend
+node packages/backend/dist/server.js
 
-Possibly after a shell `rehash`, it is available as `ldap-ui`:
-
-```text
-Usage: ldap-ui [OPTIONS]
-
-Options:
-  -b, --base-dn TEXT              LDAP base DN. Required unless the BASE_DN
-                                  environment variable is set.
-  -h, --host TEXT                 Bind socket to this host.  [default:
-                                  127.0.0.1]
-  -p, --port INTEGER              Bind socket to this port. If 0, an available
-                                  port will be picked.  [default: 5000]
-  -l, --log-level [critical|error|warning|info|debug|trace]
-                                  Log level. [default: info]
-  --version                       Display the current version and exit.
-  --help                          Show this message and exit.
+# Serve frontend from packages/frontend/dist/
+# (e.g., with nginx)
 ```
 
 ## Development
 
-Prerequisites:
+### Project Structure
 
-* [node.js](https://nodejs.dev) LTS version with NPM
-* [pnpm](https://pnpm.io)
-* [Python](https://www.python.org) ≥ 3.12
-* [uv](https://docs.astral.sh/uv/)
-* [GNU make](https://www.gnu.org/software/make/)
+```
+src/
+├── backend/
+│   ├── api/
+│   │   ├── routes/        - API endpoints (auth, entry, tree, search, schema)
+│   │   ├── middleware/    - Auth guard, error handling
+│   │   └── index.ts       - Fastify app factory
+│   ├── ldap/
+│   │   ├── client.ts      - LdapClient with pooling
+│   │   └── operations.ts  - LDAP operations
+│   ├── utils/
+│   │   ├── config.ts      - Environment loader
+│   │   ├── errors.ts      - Error classes & mapping
+│   │   ├── logger.ts      - Pino logger
+│   │   └── crypto.ts      - Password encryption
+│   └── types/
+│       └── index.ts       - Shared TypeScript types
+│
+└── frontend/
+    ├── api/
+    │   └── ldap-client.ts - Fetch API wrapper
+    ├── stores/
+    │   └── auth.ts        - Pinia auth store
+    ├── views/
+    │   └── LoginView.vue  - Login page
+    ├── components/
+    │   ├── TreeExplorer.vue  - Tree navigation
+    │   └── EntryEditor.vue   - Entry CRUD
+    └── App.vue            - Main app shell
+```
 
-`ldap-ui` consists of a Vue frontend and a Python backend that roughly translates a subset of the LDAP protocol to a stateless ReST API.
+### Commands
 
-`pnpm build` assembles the frontend in `backend/ldap_ui/statics`.
+```bash
+# Development
+pnpm dev                  # Start both (backend + frontend)
+pnpm dev:backend          # Start backend only
+pnpm dev:frontend         # Start frontend only
 
-Review the configuration in [settings.py](settings.py). It is short and mostly self-explaining (also see notes below).
-Most settings can (and should) be overridden by environment variables or settings in a `.env` file; see [env.demo](env.demo) or [env.example](env.example).
+# Building
+pnpm build                # Build both
+pnpm build:backend        # Build backend
+pnpm build:frontend       # Build frontend
 
-The backend can be run locally with `make`, which will also install dependencies and build the frontend if needed.
+# Testing
+pnpm test                 # Run all tests
+pnpm test:backend         # Backend unit tests
+pnpm test:frontend        # Frontend component tests
 
-## Notes
+# Linting
+pnpm lint                 # Lint both
+pnpm type-check           # TypeScript check
+```
 
-### Authentication methods
+## Security Considerations
 
-The UI always uses a simple `bind` operation to authenticate with the LDAP directory. How the `bind` DN is obtained from a given user name depends on a combination of OS environment variables, possibly from a `.env` file:
+### LDAP Protocol
 
-1. Search by some attribute. By default, this is the `uid`, which can be overridden by the environment variable `LOGIN_ATTR`, e.g. `LOGIN_ATTR=cn`.
-2. If the environment variable `BIND_PATTERN` is set, then no search is performed. Login with a full DN can be configured with `BIND_PATTERN=%s`, which for example allows to login as user `cn=admin,dc=example,dc=org`. If a partial DN like `BIND_PATTERN=%s,dc=example,dc=org` is configured, the corresponding login would be `cn=admin`. If a specific pattern like `BIND_PATTERN=cn=%s,dc=example,dc=org` is configured, the login name is just `admin`.
-3. If security is no concern, then a fixed `BIND_DN` and `BIND_PASSWORD` can be set in the environment. This is for demo purposes only, and probably a very bad idea if access to the UI is not restricted by any other means.
+- **Plain text passwords**: Transmitted to your LDAP server only. Use TLS/SSL for production.
+- **Simple bind only**: SASL authentication not supported (can be added if needed).
+- **User permissions**: Respected by server. UI shows only what user can access.
 
-### Searching
+### Session Management
 
-Search uses a (configurable) set of criteria#
-(default: `cn`, `gn`, `sn`, and `uid`) if the query does not contain `=`.
-Wildcards are supported, e.g. `f*` will match all `cn`, `gn`, `sn`, and `uid` starting with `f`.
-Additionally, arbitrary attributes can be searched with an LDAP filter specification, for example `sn=F*`.
+- **HttpOnly Cookies**: Session tokens not accessible via JavaScript
+- **Secure Flag**: Set in production (HTTPS only)
+- **AES-256-GCM Encryption**: LDAP passwords encrypted in session
+- **PBKDF2 Key Derivation**: 100k iterations for password encryption
 
-Apart from the search field in the navigation bar,
-searches are also performed in the entry editor for any DN-valued input field.
+### Deployment
 
-### Keyboard navigation
+- Deploy behind reverse proxy (nginx, Apache) with TLS
+- Set `SESSION_SECRET` to strong random value
+- Use `NODE_ENV=production` for hardened defaults
+- Restrict network access to LDAP server
 
-The editor and modal dialogs focus the first input when opening, so you can the ⇥ key to navigate the form.
-Save or dismiss with the ↩ key.
+## Troubleshooting
 
-The following [access keys](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/accesskey#try_it) are defined:
+### Can't Connect to LDAP
 
-| Access Key | UI Element                |
-|------------|---------------------------|
-| K          | Global search at page top |
-| A          | Add an atrribute          |
-| O          | Add an object class       |
-| R          | Reset entry modifications |
-| S          | Save an entry (same as ↩) |
+**Problem**: "Connection failed" or "Server unreachable"
 
-### Caveats
+**Solution**:
+- Verify LDAP URL format: `ldap://host:389` or `ldaps://host:636`
+- Check firewall allows connection
+- Test with `ldapsearch`: `ldapsearch -H ldap://host -x -b "dc=example,dc=org"`
 
-* The software works with [OpenLdap](http://www.openldap.org) using simple bind. Other directories have not been tested much, although [389 DS](https://www.port389.org) works to some extent.
-* SASL authentication schemes are presently not supported.
-* Passwords are transmitted as plain text. The LDAP server is expected to hash them (OpenLdap 2.4 does). I strongly recommend to expose the app through a TLS-enabled web server.
-* HTTP *Basic Authentication* is triggered unless the `AUTHORIZATION` request variable is already set by some upstream HTTP server.
+### Login Fails
 
-## Q&A
+**Problem**: "Invalid credentials"
 
-* Q: Why are some fields not editable?
-  * A: The RDN of an entry is read-only. To change it, rename the entry with a different RDN, then change the old RDN and rename back. To change passwords, click on the question mark icon on the right side. Binary fields (as per schema) are read-only. You do not want to modify them accidentally.
-* Q: Why did you write this?
-  * A: [PHPLdapAdmin](http://phpldapadmin.sf.net/) is no longer actively maintained. I needed a replacement, and wanted to try Vue.
+**Solution**:
+- Verify username and password
+- Check `LOGIN_ATTR` matches your LDAP (default: `uid`)
+- Try full DN: `cn=username,dc=example,dc=org`
+- Check user has permissions on directory
 
-## Acknowledgements
+### API Errors
 
-The Python backend uses [FastAPI](https://fastapi.tiangolo.com). The UI is built with [Vue.js](https://vuejs.org) and [Tailwind CSS](https://tailwindcss.com/). Kudos to the authors of these elegant frameworks!
+**Problem**: Browser shows "Cannot reach API" or 404 errors
+
+**Solution**:
+- Verify backend running: `curl http://localhost:5000/api/health`
+- Check Vite dev proxy in `vite.config.ts`
+- Look at browser console for network errors
+- Check backend logs for errors
+
+### Slow Operations
+
+**Problem**: Tree navigation or search is slow
+
+**Solution**:
+- Check `sizeLimit` in search (defaults to 1000)
+- Reduce search scope or use more specific filter
+- Look at backend logs for LDAP operation time
+- Consider indexing on LDAP server for frequently searched attributes
+
+## Browser Support
+
+Modern browsers (ES2020+):
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+## Roadmap (Phase 4+)
+
+- [ ] LDIF import/export
+- [ ] Image support (jpegPhoto, thumbnailPhoto)
+- [ ] Password change dialog
+- [ ] Advanced search builder UI
+- [ ] Mobile responsive design
+- [ ] Dark mode
+- [ ] Multi-language support
+- [ ] E2E tests (Playwright)
+- [ ] GraphQL API alternative
+
+## FAQ
+
+**Q: Do I need a database?**  
+A: No. LDAP IS your database. This is a stateless API that reads/writes directly to LDAP.
+
+**Q: Can I use this with Active Directory?**  
+A: Yes! AD supports LDAP protocol. Use appropriate login patterns and schema-aware validation.
+
+**Q: Is this secure for production?**  
+A: Yes, with proper deployment:
+- Run behind TLS reverse proxy
+- Set strong SESSION_SECRET
+- Restrict network access
+- Use secure LDAP connections (ldaps://)
+
+**Q: Can I customize the UI?**  
+A: Yes! Full source code. Modify Vue components, Vuetify theme, or add new features.
+
+**Q: Can I embed this in another app?**  
+A: Yes! Export the Fastify API from `packages/backend/src/api/index.ts` or use the npm package.
+
+## Acknowledgments
+
+Built with modern tools:
+- **Fastify** - Fast REST framework
+- **ldapjs** - LDAP client library
+- **Vue.js** - Progressive framework
+- **Vuetify** - Material Design components
+- **Pinia** - State management
+- **Vite** - Build tool
+
+## License
+
+GPL-3.0
+
+## Support
+
+For issues, feature requests, or questions:
+- GitHub Issues: [Report a bug](https://github.com/boehand/ldap-nodejs-ui/issues)
+- Discussions: [Ask a question](https://github.com/boehand/ldap-nodejs-ui/discussions)
+
+## Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+---
+
+**Made with ❤️ for LDAP administrators**
