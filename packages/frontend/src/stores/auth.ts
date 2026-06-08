@@ -23,7 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!bindDn.value && !!ldapUrl.value);
 
   // Actions
-  async function login(url: string, username: string, password: string) {
+  async function login(url: string, username: string, password: string, baseDn?: string) {
     loading.value = true;
     error.value = null;
 
@@ -32,6 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
         ldapUrl: url,
         username,
         password,
+        baseDn,
       });
 
       if (response.success && response.data) {
