@@ -71,18 +71,17 @@ export async function createApp(config?: LdapConfig): Promise<FastifyInstance> {
     },
   });
 
-  // Serve static files from frontend build (optional)
-  // In development, Vite dev server serves frontend
-  // In production, frontend is built into dist/frontend
-  const frontendPath = join(__dirname, '../../frontend/dist');
-  try {
-    await app.register(fastifyStatic, {
-      root: frontendPath,
-      constraints: {},
-    });
-  } catch {
-    // Frontend dist might not exist in development, that's OK
-    logger.debug('Frontend static files not found at %s', frontendPath);
+  // Serve static files from frontend build (production only)
+  if (appConfig.nodeEnv === 'production') {
+    const frontendPath = join(__dirname, '../../frontend/dist');
+    try {
+      await app.register(fastifyStatic, {
+        root: frontendPath,
+        wildcard: false,
+      });
+    } catch {
+      logger.debug('Frontend static files not found at %s', frontendPath);
+    }
   }
 
   // Register authentication middleware
@@ -136,7 +135,7 @@ export async function createApp(config?: LdapConfig): Promise<FastifyInstance> {
   await registerSchemaRoutes(app);
 
   // 404 handler
-  app.get('*', (request, reply) => {
+  app.setNotFoundHandler((request, reply) => {
     reply.code(404).send({
       success: false,
       error: {
