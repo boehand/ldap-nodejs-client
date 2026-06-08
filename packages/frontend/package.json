@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "generate": "openapi-ts -i ../../_legacy/tests/resources/openapi.json -o src/generated --client fetch && echo 'export * from \"./services.gen\";' > src/generated/sdk.gen.ts",
-    "dev": "vite",
+    "dev": "run-s generate dev-only",
+    "dev-only": "vite",
     "build": "run-s generate type-check build-only",
     "build-only": "vite build",
     "preview": "vite preview",
