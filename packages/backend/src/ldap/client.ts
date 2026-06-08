@@ -273,7 +273,7 @@ export class LdapClient {
 
           res.on('searchEntry', (entry) => {
             entries.push({
-              dn: entry.dn,
+              dn: String(entry.dn),
               attributes: this.attributesToObject(entry.attributes),
               rawAttributes: this.rawAttributesToObject(entry.attributes),
             });

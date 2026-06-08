@@ -13,9 +13,9 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
    * Login with LDAP credentials
    */
   app.post<{
-    Body: { ldapUrl: string; username: string; password: string };
+    Body: { ldapUrl: string; username: string; password: string; baseDn?: string; loginAttr?: string };
   }>('/api/auth/login', async (request, reply) => {
-    const { ldapUrl, username, password } = request.body;
+    const { ldapUrl, username, password, baseDn, loginAttr } = request.body;
 
     if (!ldapUrl || !username || !password) {
       throw new ValidationError(
@@ -24,17 +24,38 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
     }
 
     try {
-      // Test LDAP connection and bind
       const client = new LdapClient(ldapUrl);
 
-      // If username looks like a full DN, use it directly
-      // Otherwise, construct DN from username
       let bindDn = username;
       if (!username.includes('=')) {
-        // Simple username provided, assume uid=username,... format
-        // For now, just use the username as DN suffix
-        // Real implementation would search for the user first
-        bindDn = `uid=${username},dc=example,dc=org`; // TODO: make configurable
+        const attr = loginAttr || 'uid';
+        if (baseDn) {
+          bindDn = `${attr}=${username},${baseDn}`;
+        } else {
+          // Try to find the user via anonymous search
+          const searchBases = ['', 'dc=example,dc=org'];
+          let found = false;
+          for (const base of searchBases) {
+            try {
+              const results = await client.search({
+                baseDn: base,
+                filter: `(${attr}=${username})`,
+                scope: 'sub',
+                sizeLimit: 1,
+              });
+              if (results.length > 0) {
+                bindDn = results[0].dn;
+                found = true;
+                break;
+              }
+            } catch {
+              // Search failed, try next base
+            }
+          }
+          if (!found) {
+            bindDn = `${attr}=${username}`;
+          }
+        }
       }
 
       await client.bind(bindDn, password);

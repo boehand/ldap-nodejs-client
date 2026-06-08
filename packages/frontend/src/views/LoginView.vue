@@ -17,7 +17,6 @@
                   placeholder="ldap://localhost:389"
                   type="url"
                   required
-                  :items="authStore.savedUrls"
                   clearable
                   class="mb-4"
                 ></v-text-field>
@@ -32,11 +31,22 @@
                   class="mb-4"
                 ></v-select>
 
+                <!-- Base DN -->
+                <v-text-field
+                  v-model="baseDn"
+                  label="Base DN"
+                  placeholder="dc=example,dc=org"
+                  hint="Used to locate users when entering a simple username"
+                  persistent-hint
+                  clearable
+                  class="mb-4"
+                ></v-text-field>
+
                 <!-- Username -->
                 <v-text-field
                   v-model="username"
                   label="Username"
-                  placeholder="admin or cn=admin,dc=example,dc=org"
+                  placeholder="test or uid=test,ou=people,dc=example,dc=org"
                   required
                   class="mb-4"
                 ></v-text-field>
@@ -94,11 +104,11 @@ import { useAuthStore } from '../stores/auth';
 const authStore = useAuthStore();
 
 const selectedUrl = ref('');
+const baseDn = ref('');
 const username = ref('');
 const password = ref('');
 
 onMounted(async () => {
-  // Fetch saved URLs on mount
   await authStore.fetchSavedUrls();
 });
 
@@ -107,9 +117,8 @@ async function handleLogin() {
     return;
   }
 
-  await authStore.login(selectedUrl.value, username.value, password.value);
+  await authStore.login(selectedUrl.value, username.value, password.value, baseDn.value || undefined);
 
-  // Clear form on successful login
   if (authStore.isAuthenticated) {
     username.value = '';
     password.value = '';
