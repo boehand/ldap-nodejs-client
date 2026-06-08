@@ -1,9 +1,9 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { LdapClient } from '../../ldap/client.js';
 import { encryptPassword, decryptPassword } from '../../utils/crypto.js';
 import { AuthenticationError, ValidationError } from '../../utils/errors.js';
 import { getLogger } from '../../utils/logger.js';
-import type { LdapSession } from '../../types/index.js';
+import '../../types/index.js';
 
 const logger = getLogger();
 
@@ -14,7 +14,7 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
    */
   app.post<{
     Body: { ldapUrl: string; username: string; password: string };
-  }>('/api/auth/login', async (request: FastifyRequest, reply: FastifyReply) => {
+  }>('/api/auth/login', async (request, reply) => {
     const { ldapUrl, username, password } = request.body;
 
     if (!ldapUrl || !username || !password) {
@@ -43,7 +43,7 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
       // Store credentials in encrypted session
       const encryptedPassword = encryptPassword(
         password,
-        request.session.id as string
+        request.session.sessionId as string
       );
       const now = Date.now();
 
@@ -51,7 +51,7 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
       request.session.ldapUrl = ldapUrl;
       request.session.encryptedPassword = encryptedPassword;
       request.session.encryptedAt = now;
-      request.session.expiresAt = now + (request.session.id ? 86400000 : 0); // 24h
+      request.session.expiresAt = now + (request.session.sessionId ? 86400000 : 0); // 24h
 
       // Initialize saved URLs if not present
       if (!request.session.savedUrls) {
@@ -91,7 +91,7 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
   app.post(
     '/api/auth/logout',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       request.session.bindDn = '';
       request.session.ldapUrl = '';
       request.session.encryptedPassword = '';
@@ -112,7 +112,7 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
   app.get(
     '/api/auth/whoami',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       reply.code(200).send({
         success: true,
         data: {
@@ -130,7 +130,7 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
    */
   app.get<{ Querystring: { anonymous?: boolean } }>(
     '/api/auth/urls',
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       // Allow anonymous access to get saved URLs (for login screen)
       const savedUrls = request.session?.savedUrls || [];
 

@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import '../../types/index.js';
 import { LdapClient } from '../../ldap/client.js';
 import { getLogger } from '../../utils/logger.js';
 import type { SearchParams } from '../../types/index.js';
@@ -10,7 +11,7 @@ export async function registerSchemaRoutes(app: FastifyInstance): Promise<void> 
    * GET /api/schema
    * Get LDAP schema
    */
-  app.get('/api/schema', async (request: FastifyRequest, reply: FastifyReply) => {
+  app.get('/api/schema', async (request, reply) => {
     // Allow anonymous access for login screen
     const useAuth = !!request.ldapCreds;
     const ldapUrl = request.ldapCreds?.ldapUrl || request.session?.ldapUrl;
@@ -101,7 +102,7 @@ export async function registerSchemaRoutes(app: FastifyInstance): Promise<void> 
   app.get<{ Params: { name: string } }>(
     '/api/schema/objectClass/:name',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { name } = request.params;
 
       const client = new LdapClient(request.ldapCreds!.ldapUrl);
@@ -151,7 +152,7 @@ export async function registerSchemaRoutes(app: FastifyInstance): Promise<void> 
   app.get<{ Params: { name: string } }>(
     '/api/schema/attributeType/:name',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { name } = request.params;
 
       const client = new LdapClient(request.ldapCreds!.ldapUrl);

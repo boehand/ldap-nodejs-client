@@ -253,10 +253,12 @@ onMounted(async () => {
   )
     return;
 
-  const response = await getRange({ path: { attribute: props.attr.name! } });
-  if (!response.data) return;
-
-  const range = response.data;
+  let range;
+  try {
+    range = await getRange({ attribute: props.attr.name! });
+  } catch (e) {
+    return;
+  }
   hint.value =
     range.min == range.max
       ? "> " + range.min
@@ -355,10 +357,16 @@ function complete(dn: string): void {
 
 // remove an image
 async function doDeleteBlob(index: number) {
-  const response = await deleteBlob({
-    path: { attr: props.attr.name!, index, dn: props.entry.dn },
-  });
-  if (!response.error) emit("reload-form", props.entry.dn, [props.attr.name!]);
+  try {
+    await deleteBlob({
+      attr: props.attr.name!,
+      index,
+      dn: props.entry.dn,
+    });
+    emit("reload-form", props.entry.dn, [props.attr.name!]);
+  } catch (e) {
+    // ignore
+  }
 }
 </script>
 

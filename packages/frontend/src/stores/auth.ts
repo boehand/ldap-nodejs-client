@@ -28,7 +28,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
 
     try {
-      const response = await ldapApi.post('/api/auth/login', {
+      const response = await ldapApi.post<{ bindDn: string; ldapUrl: string }>('/api/auth/login', {
         ldapUrl: url,
         username,
         password,
@@ -68,7 +68,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchSavedUrls() {
     try {
-      const response = await ldapApi.get('/api/auth/urls');
+      const response = await ldapApi.get<{ savedUrls: string[] }>('/api/auth/urls');
       if (response.success && response.data?.savedUrls) {
         savedUrls.value = response.data.savedUrls;
       }
@@ -79,7 +79,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function checkAuth() {
     try {
-      const response = await ldapApi.get('/api/auth/whoami');
+      const response = await ldapApi.get<{ bindDn: string; ldapUrl: string; savedUrls: string[] }>('/api/auth/whoami');
       if (response.success && response.data) {
         bindDn.value = response.data.bindDn;
         ldapUrl.value = response.data.ldapUrl;

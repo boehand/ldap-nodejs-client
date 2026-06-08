@@ -32,7 +32,7 @@ export class LdapConnectionPool {
   private maxConnections: number;
   private connectionTimeout: number;
   private idleTimeout: number;
-  private cleanupInterval: NodeJS.Timer | null = null;
+  private cleanupInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(config: ConnectionPoolConfig) {
     this.config = config;

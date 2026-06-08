@@ -41,9 +41,10 @@ const props = defineProps<{
 
 // List subordinate elements to be deleted
 async function init() {
-  const response = await getSubtree({ path: { root_dn: props.dn } });
-  if (response.data) {
-    subtree.value = response.data;
+  try {
+    subtree.value = await getSubtree({ rootDn: props.dn });
+  } catch (e) {
+    // ignore
   }
 }
 

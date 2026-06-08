@@ -80,7 +80,7 @@ import CopyEntryDialog from "./CopyEntryDialog.vue";
 import DeleteEntryDialog from "./DeleteEntryDialog.vue";
 import DiscardEntryDialog from "./DiscardEntryDialog.vue";
 import DropdownMenu from "../ui/DropdownMenu.vue";
-import type { Entry, HttpValidationError } from "../../generated/types.gen";
+import type { Entry, HTTPValidationError } from "../../generated/types.gen";
 import NewEntryDialog from "./NewEntryDialog.vue";
 import NodeLabel from "../NodeLabel.vue";
 import PasswordChangeDialog from "./PasswordChangeDialog.vue";
@@ -193,8 +193,14 @@ function addMandatoryRows(): string | undefined {
   must.forEach((attr) => (entry.value!.attrs[attr] = [""]));
   return must.length ? must[0] + "-0" : undefined;
 }
-function showError(error: HttpValidationError): void {
-  state.showError(error.detail?.join("\n") || "Operation failed");
+function showError(error: any): void {
+  if (typeof error === 'string') {
+    state.showError(error);
+  } else if (error?.detail) {
+    state.showError(Array.isArray(error.detail) ? error.detail.join("\n") : String(error.detail));
+  } else {
+    state.showError(error?.message || "Operation failed");
+  }
 }
 
 // Load an entry into the editing form
@@ -205,12 +211,14 @@ async function load(dn?: string, changed?: string[], focused?: string) {
     entry.value = undefined;
     return;
   }
-  const response = await getEntry({ path: { dn }});
-  if (response.error) {
-    showError(response.error);
+  let loadedEntry: Entry;
+  try {
+    loadedEntry = await getEntry({ dn });
+  } catch (e: any) {
+    showError(e?.body ?? e?.message ?? String(e));
     return;
   }
-  entry.value = response.data;
+  entry.value = loadedEntry;
   entry.value!.changed = changed || [];
   entry.value!.isNew = false;
 
@@ -231,26 +239,21 @@ async function save() {
 
   entry.value!.changed = [];
   let changed: string[] = [];
-  if (entry.value!.isNew) {
-    const response = await putEntry({
-      path: { dn: entry.value!.dn },
-      body: entry.value!.attrs,
-    });
-    if (response.error) {
-      showError(response.error);
-      return;
+  try {
+    if (entry.value!.isNew) {
+      changed = await putEntry({
+        dn: entry.value!.dn,
+        requestBody: entry.value!.attrs,
+      });
+    } else {
+      changed = await postEntry({
+        dn: entry.value!.dn,
+        requestBody: entry.value!.attrs,
+      });
     }
-    changed = response.data;
-  } else {
-    const response = await postEntry({
-      path: { dn: entry.value!.dn },
-      body: entry.value!.attrs,
-    });
-    if (response.error) {
-      showError(response.error);
-      return;
-    }
-    changed = response.data;
+  } catch (e: any) {
+    showError(e?.body ?? e?.message ?? String(e));
+    return;
   }
 
   if (entry.value!.isNew) {
@@ -260,12 +263,13 @@ async function save() {
 }
 
 async function renameEntry(rdn: string) {
-  const response = await postRenameEntry({
-    path: { dn: entry.value!.dn },
-    body: rdn,
-  });
-  if (response.error) {
-    showError(response.error);
+  try {
+    await postRenameEntry({
+      dn: entry.value!.dn,
+      requestBody: rdn,
+    });
+  } catch (e: any) {
+    showError(e?.body ?? e?.message ?? String(e));
     return;
   }
 
@@ -275,9 +279,10 @@ async function renameEntry(rdn: string) {
 }
 
 async function deleteEntryByDn(dn: string) {
-  const response = await deleteEntry({ path: { dn }});
-  if (response.error) {
-    showError(response.error);
+  try {
+    await deleteEntry({ dn });
+  } catch (e: any) {
+    showError(e?.body ?? e?.message ?? String(e));
     return;
   }
   document.title = "Directory";
@@ -286,15 +291,15 @@ async function deleteEntryByDn(dn: string) {
 }
 
 async function changePassword(oldPass: string, newPass: string) {
-  const response = await postChangePassword({
-    path: { dn: entry.value!.dn },
-    body: { old: oldPass, new1: newPass },
-  });
-  if (response.error) {
-    showError(response.error);
-  } else {
+  try {
+    await postChangePassword({
+      dn: entry.value!.dn,
+      requestBody: { old: oldPass, new1: newPass },
+    });
     entry.value!.attrs.userPassword = [newPass];
     entry.value!.changed = ["userPassword"];
+  } catch (e: any) {
+    showError(e?.body ?? e?.message ?? String(e));
   }
 }
 

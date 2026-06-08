@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, useTemplateRef, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useEventListener, useMouseInElement } from "@vueuse/core";
 
 const props = defineProps<{ open?: boolean }>(),
@@ -25,9 +25,9 @@ const props = defineProps<{ open?: boolean }>(),
     closed: [];
     "update:open": [];
   }>(),
-  items = useTemplateRef("items"),
+  items = ref<HTMLUListElement | null>(null),
   selected = ref<number>(),
-  { isOutside } = useMouseInElement(items);
+  { isOutside } = useMouseInElement(items as any);
 
 function close() {
   selected.value = undefined;

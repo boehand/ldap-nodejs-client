@@ -93,9 +93,10 @@ defineProps<{
 
 onMounted(async () => {
   // Get the DN of the current user
-  const response = await getWhoAmI();
-  if (response.data) {
-    user.value = response.data;
+  try {
+    user.value = await getWhoAmI();
+  } catch (e) {
+    // ignore
   }
 });
 

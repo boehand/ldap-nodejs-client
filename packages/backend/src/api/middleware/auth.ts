@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { decryptPassword } from '../../utils/crypto.js';
 import { getLogger } from '../../utils/logger.js';
+import '../../types/index.js';
 
 const logger = getLogger();
 
@@ -28,7 +29,7 @@ export async function registerAuthMiddleware(app: FastifyInstance): Promise<void
         // Decrypt password from session
         const password = decryptPassword(
           request.session.encryptedPassword,
-          request.session.id
+          request.session.sessionId
         );
 
         // Attach decrypted credentials to request
@@ -53,11 +54,4 @@ export async function registerAuthMiddleware(app: FastifyInstance): Promise<void
   );
 }
 
-// Extend Fastify instance type
-declare global {
-  namespace Fastify {
-    interface FastifyInstance {
-      authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
-    }
-  }
-}
+// Type augmentation is in types/index.ts

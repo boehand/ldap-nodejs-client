@@ -1,8 +1,9 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { LdapClient } from '../../ldap/client.js';
 import { decryptPassword } from '../../utils/crypto.js';
 import { NotFoundError, ValidationError, LdapError } from '../../utils/errors.js';
 import { getLogger } from '../../utils/logger.js';
+import '../../types/index.js';
 
 const logger = getLogger();
 
@@ -14,7 +15,7 @@ export async function registerEntryRoutes(app: FastifyInstance): Promise<void> {
   app.get<{ Params: { dn: string } }>(
     '/api/entry/:dn',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { dn } = request.params;
       const decodedDn = decodeURIComponent(dn);
 
@@ -43,7 +44,7 @@ export async function registerEntryRoutes(app: FastifyInstance): Promise<void> {
   }>(
     '/api/entry/:parentDn',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { parentDn } = request.params;
       const { rdn, objectClass, attributes } = request.body;
       const decodedParentDn = decodeURIComponent(parentDn);
@@ -86,7 +87,7 @@ export async function registerEntryRoutes(app: FastifyInstance): Promise<void> {
   }>(
     '/api/entry/:dn',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { dn } = request.params;
       const { attributes } = request.body;
       const decodedDn = decodeURIComponent(dn);
@@ -119,7 +120,7 @@ export async function registerEntryRoutes(app: FastifyInstance): Promise<void> {
   app.delete<{ Params: { dn: string } }>(
     '/api/entry/:dn',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { dn } = request.params;
       const decodedDn = decodeURIComponent(dn);
 
@@ -150,7 +151,7 @@ export async function registerEntryRoutes(app: FastifyInstance): Promise<void> {
   }>(
     '/api/entry/:dn/rename',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { dn } = request.params;
       const { newRdn } = request.body;
       const decodedDn = decodeURIComponent(dn);
@@ -186,7 +187,7 @@ export async function registerEntryRoutes(app: FastifyInstance): Promise<void> {
   }>(
     '/api/entry/:dn/change-password',
     { onRequest: app.authenticate },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { dn } = request.params;
       const { newPassword } = request.body;
       const decodedDn = decodeURIComponent(dn);

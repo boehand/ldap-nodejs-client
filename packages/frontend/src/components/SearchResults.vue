@@ -47,9 +47,11 @@ watch(
   async (q) => {
     if (!q) return;
 
-    const response = await search({ path: { query: q }});
-    if (!response.data) return;
-    results.value = await response.data;
+    try {
+      results.value = await search({ query: q });
+    } catch (e) {
+      return;
+    }
 
     if (results.value.length == 0 && !props.silent) {
       state.showWarning("No search results");
