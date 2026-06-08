@@ -1,21 +1,38 @@
 {
   "name": "ldap-ui",
   "version": "1.0.0",
-  "description": "A fast and versatile LDAP editor",
-  "private": true,
+  "description": "A fast and versatile LDAP editor - modern web UI for LDAP directories",
+  "private": false,
   "type": "module",
   "license": "GPL-3.0",
+  "homepage": "https://github.com/boehand/ldap-nodejs-ui",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boehand/ldap-nodejs-ui.git"
+  },
+  "keywords": [
+    "ldap",
+    "directory",
+    "editor",
+    "admin",
+    "openldap",
+    "web-ui",
+    "vue",
+    "nodejs"
+  ],
   "workspaces": [
     "packages/frontend",
     "packages/backend"
   ],
   "scripts": {
+    "postinstall": "node scripts/postinstall.js",
     "dev": "pnpm -r dev",
     "dev:backend": "pnpm --filter @ldap-ui/backend dev",
     "dev:frontend": "pnpm --filter @ldap-ui/frontend dev",
     "build": "pnpm -r build",
     "build:backend": "pnpm --filter @ldap-ui/backend build",
     "build:frontend": "pnpm --filter @ldap-ui/frontend build",
+    "start": "node packages/backend/dist/server.js",
     "test": "pnpm -r test",
     "test:backend": "pnpm --filter @ldap-ui/backend test",
     "test:frontend": "pnpm --filter @ldap-ui/frontend test",
@@ -32,3 +49,4 @@
     "pnpm": ">=9.0.0"
   }
 }
+
