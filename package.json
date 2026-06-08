@@ -40,9 +40,9 @@
     "type-check": "pnpm -r type-check"
   },
   "devDependencies": {
-    "@tsconfig/node24": "latest",
-    "@types/node": "latest",
-    "typescript": "latest"
+    "@tsconfig/node24": "24.x",
+    "@types/node": "20.x",
+    "typescript": "5.x"
   },
   "engines": {
     "node": ">=20.0.0",
