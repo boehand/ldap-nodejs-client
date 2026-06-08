@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { useTemplateRef } from "vue";
 import Modal from "../ui/Modal.vue";
-import { putBlob } from "../../generated/sdk.gen";
+import { ldapApi } from "../../api/ldap-client";
 
 const props = defineProps({
     dn: { type: String, required: true },
@@ -44,11 +44,12 @@ async function onOk(evt: Event) {
   if (!target?.files) return;
 
   try {
-    await putBlob({
-      attr: props.attr!,
-      index: 0,
-      dn: props.dn,
-      formData: { blob: target.files[0]! as any },
+    const formData = new FormData();
+    formData.append('blob', target.files[0]!);
+    await fetch(`/api/blob/${encodeURIComponent(props.attr!)}/${0}/${encodeURIComponent(props.dn)}`, {
+      method: 'PUT',
+      body: formData,
+      credentials: 'include',
     });
     emit("update:modal");
     emit("ok", props.dn, [props.attr!]);

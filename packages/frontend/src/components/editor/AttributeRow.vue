@@ -145,8 +145,8 @@ import AttributeSearch from "./AttributeSearch.vue";
 import SearchResults from "../SearchResults.vue";
 import ToggleButton from "../ui/ToggleButton.vue";
 import { state } from "../../state";
-import { getRange, deleteBlob } from "../../generated/sdk.gen";
-import type { Entry } from "@/generated";
+import { ldapApi } from "../../api/ldap-client";
+import type { Entry } from "../../api/ldap-client";
 
 function unique(
   element: unknown,
@@ -255,7 +255,9 @@ onMounted(async () => {
 
   let range;
   try {
-    range = await getRange({ attribute: props.attr.name! });
+    const resp = await ldapApi.get<{ min: number; max: number; next: number }>(`/range/${encodeURIComponent(props.attr.name!)}`);
+    if (!resp.success || !resp.data) return;
+    range = resp.data;
   } catch (e) {
     return;
   }
@@ -358,11 +360,7 @@ function complete(dn: string): void {
 // remove an image
 async function doDeleteBlob(index: number) {
   try {
-    await deleteBlob({
-      attr: props.attr.name!,
-      index,
-      dn: props.entry.dn,
-    });
+    await ldapApi.delete(`/blob/${encodeURIComponent(props.attr.name!)}/${index}/${encodeURIComponent(props.entry.dn)}`);
     emit("reload-form", props.entry.dn, [props.attr.name!]);
   } catch (e) {
     // ignore

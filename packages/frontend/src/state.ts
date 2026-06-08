@@ -1,7 +1,7 @@
 import { reactive } from "vue";
 import type { Alert } from "./components/Alert";
 import { LdapSchema } from "./components/schema/schema";
-import { getSchema } from "./generated/sdk.gen";
+import { fetchSchema } from "./api/ldap-client";
 
 class State {
   baseDn? : string;
@@ -40,8 +40,12 @@ class State {
 export const state = reactive(new State());
 export async function initState() {
   // Load the schema
-  const schema = await getSchema();
-  if (schema) {
-    state.schema = new LdapSchema(schema);
+  try {
+    const schema = await fetchSchema();
+    if (schema) {
+      state.schema = new LdapSchema(schema);
+    }
+  } catch {
+    // Schema loading is optional
   }
 }
