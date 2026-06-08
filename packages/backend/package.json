@@ -20,7 +20,7 @@
     }
   },
   "scripts": {
-    "dev": "node --loader tsx src/server.ts",
+    "dev": "node --import tsx src/server.ts",
     "build": "tsc && esbuild src/server.ts src/cli.ts --bundle --platform=node --format=esm --outdir=dist",
     "build:watch": "tsc --watch",
     "type-check": "tsc --noEmit",
