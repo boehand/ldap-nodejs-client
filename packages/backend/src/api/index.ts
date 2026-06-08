@@ -10,6 +10,12 @@ import { getLogger } from '../utils/logger.js';
 import { getConfig } from '../utils/config.js';
 import type { LdapConfig } from '../types/index.js';
 import { AppError, getHttpStatusCode, getLdapErrorInfo } from '../utils/errors.js';
+import { registerAuthMiddleware } from './middleware/auth.js';
+import { registerAuthRoutes } from './routes/auth.js';
+import { registerEntryRoutes } from './routes/entry.js';
+import { registerTreeRoutes } from './routes/tree.js';
+import { registerSearchRoutes } from './routes/search.js';
+import { registerSchemaRoutes } from './routes/schema.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -79,6 +85,9 @@ export async function createApp(config?: LdapConfig): Promise<FastifyInstance> {
     logger.debug('Frontend static files not found at %s', frontendPath);
   }
 
+  // Register authentication middleware
+  await registerAuthMiddleware(app);
+
   // Request logging middleware
   app.addHook('onRequest', async (request, reply) => {
     logger.debug(
@@ -119,8 +128,12 @@ export async function createApp(config?: LdapConfig): Promise<FastifyInstance> {
     return { status: 'ok', timestamp: new Date().toISOString() };
   });
 
-  // API routes will be registered here by the routes module
-  // For now, this serves as the foundation
+  // Register API routes
+  await registerAuthRoutes(app);
+  await registerEntryRoutes(app);
+  await registerTreeRoutes(app);
+  await registerSearchRoutes(app);
+  await registerSchemaRoutes(app);
 
   // 404 handler
   app.get('*', (request, reply) => {
