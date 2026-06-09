@@ -23,10 +23,11 @@ const reset = '\x1b[0m';
 console.log(`\n  Running "${script}" in all workspaces (parallel)...\n`);
 
 const children = workspaces.map(({ name, path: wsPath, color }) => {
-  const child = spawn('npm', ['--workspace', wsPath, 'run', script], {
+  const isWindows = process.platform === 'win32';
+  const cmd = isWindows ? 'npm.cmd' : 'npm';
+  const child = spawn(cmd, ['--workspace', wsPath, 'run', script], {
     cwd: rootDir,
     stdio: ['ignore', 'pipe', 'pipe'],
-    shell: true,
   });
 
   const prefix = `${color}[${name}]${reset} `;
