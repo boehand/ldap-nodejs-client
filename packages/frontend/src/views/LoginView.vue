@@ -103,8 +103,8 @@ import { useAuthStore } from '../stores/auth';
 
 const authStore = useAuthStore();
 
-const selectedUrl = ref('');
-const baseDn = ref('');
+const selectedUrl = ref(localStorage.getItem('ldap-url') || '');
+const baseDn = ref(localStorage.getItem('ldap-baseDn') || '');
 const username = ref('');
 const password = ref('');
 
@@ -116,6 +116,9 @@ async function handleLogin() {
   if (!selectedUrl.value || !username.value || !password.value) {
     return;
   }
+
+  localStorage.setItem('ldap-url', selectedUrl.value);
+  localStorage.setItem('ldap-baseDn', baseDn.value);
 
   await authStore.login(selectedUrl.value, username.value, password.value, baseDn.value || undefined);
 
