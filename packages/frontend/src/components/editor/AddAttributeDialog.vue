@@ -8,15 +8,12 @@
     @ok="onOk"
     @cancel="emit('update:modal')"
   >
-    <div v-if="available.length > 0">
-      <select v-model="attr" ref="select" @keyup.enter="onOk">
-        <option v-for="a in available" :key="a">{{ a }}</option>
-      </select>
-    </div>
-    <div v-else>
-      <input v-model="attr" ref="select" type="text" placeholder="Attribute name (e.g. mail, telephoneNumber)"
-        class="w-full border border-gray-300 rounded px-2 py-1" @keyup.enter="onOk" />
-    </div>
+    <input v-model="attr" ref="select" type="text" list="attr-suggestions"
+      placeholder="Attribute name (e.g. mail, telephoneNumber)"
+      class="w-full border border-gray-300 rounded px-2 py-1" @keyup.enter="onOk" />
+    <datalist id="attr-suggestions">
+      <option v-for="a in available" :key="a" :value="a" />
+    </datalist>
   </modal>
 </template>
 
