@@ -508,7 +508,11 @@ export class LdapClient {
    * Destroy client and close all connections
    */
   async destroy(): Promise<void> {
-    await this.pool.destroy();
+    try {
+      await this.pool.destroy();
+    } catch (error) {
+      logger.warn({ error }, 'Error during LDAP client cleanup');
+    }
   }
 
   private attributesToObject(
