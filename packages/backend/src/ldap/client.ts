@@ -1,4 +1,6 @@
-import ldapjs, { Client, Change, Attribute as LdapAttribute } from 'ldapjs';
+import ldapjs from 'ldapjs';
+const { Change, Attribute: LdapAttribute } = ldapjs;
+type Client = ldapjs.Client;
 import { EventEmitter } from 'events';
 import { getLogger } from '../utils/logger.js';
 import { LdapError } from '../utils/errors.js';
