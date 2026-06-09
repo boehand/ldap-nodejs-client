@@ -1,4 +1,4 @@
-import ldapjs, { Client } from 'ldapjs';
+import ldapjs, { Client, Change, Attribute as LdapAttribute } from 'ldapjs';
 import { EventEmitter } from 'events';
 import { getLogger } from '../utils/logger.js';
 import { LdapError } from '../utils/errors.js';
@@ -365,22 +365,20 @@ export class LdapClient {
 
     try {
       return new Promise((resolve, reject) => {
-        const modifications: LdapChange[] = [];
+        const modifications: any[] = [];
 
         for (const [attrName, value] of Object.entries(changes)) {
           if (value === null) {
-            // Delete attribute
-            modifications.push({
+            modifications.push(new Change({
               operation: 'delete',
-              modification: { [attrName]: [] },
-            });
+              modification: new LdapAttribute({ type: attrName }),
+            }));
           } else {
-            // Replace attribute
             const attrValues = Array.isArray(value) ? value : [value];
-            modifications.push({
+            modifications.push(new Change({
               operation: 'replace',
-              modification: { [attrName]: attrValues },
-            });
+              modification: new LdapAttribute({ type: attrName, values: attrValues }),
+            }));
           }
         }
 
