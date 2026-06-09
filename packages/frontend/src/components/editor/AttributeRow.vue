@@ -8,7 +8,7 @@
         class="cursor-pointer oc"
         :title="attr.desc"
         @click="emit('show-attr', attr.name)"
-        >{{ attr }}</span
+        >{{ attr.name }}</span
       >
       <i v-if="changed" class="fa text-emerald-700 ml-1 fa-check"></i>
     </div>
@@ -196,7 +196,7 @@ const dateFormat: Intl.DateTimeFormatOptions = {
     () => props.values.length == 1 && props.values[0] == autoFilled.value,
   ),
   empty = computed(() => props.values.every((value) => !value.trim())),
-  illegal = computed(() => !props.must && !props.may),
+  illegal = computed(() => !!state.schema && !props.must && !props.may),
   isRdn = computed(() => props.attr.name == props.entry.dn.split("=")[0]),
   oid = computed(() => props.attr.syntax == syntaxes.oid),
   missing = computed(() => empty.value && props.must),
