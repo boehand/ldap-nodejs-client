@@ -43,7 +43,7 @@
 
     <form id="entry" class="space-y-4 my-4" @submit.prevent="save" @reset="load(entry!.dn, undefined, undefined)"
       @focusin="onFocus">
-      <attribute-row v-for="key in keys" :key="key" :base-dn="props.baseDn" :attr="state.schema?.attr(key) ?? new Attribute({ name: key })"
+      <attribute-row v-for="key in keys" :key="key" :base-dn="props.baseDn" :attr="attrForKey(key)"
         :entry="entry" :values="entry.attrs[key]!" :changed="hasChanged(key)" :may="attributes('may').includes(key)"
         :must="attributes('must').includes(key)" @update="updateRow" @reload-form="load" @valid="valid(key, $event)"
         @show-modal="modal = $event" @show-attr="emit('show-attr', $event)" @show-oc="emit('show-oc', $event)" />
@@ -88,6 +88,14 @@ import PasswordChangeDialog from "./PasswordChangeDialog.vue";
 import RenameEntryDialog from "./RenameEntryDialog.vue";
 import { state } from "../../state";
 import { Attribute } from "../schema/schema";
+
+function attrForKey(key: string): Attribute {
+  if (state.schema) {
+    const a = state.schema.attr(key);
+    if (a) return a;
+  }
+  return { name: key } as Attribute;
+}
 
 function unique(
   element: unknown,
