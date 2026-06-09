@@ -28,6 +28,7 @@ const children = workspaces.map(({ name, path: wsPath, color }) => {
   const child = spawn(cmd, ['--workspace', wsPath, 'run', script], {
     cwd: rootDir,
     stdio: ['ignore', 'pipe', 'pipe'],
+    shell: true,
   });
 
   const prefix = `${color}[${name}]${reset} `;
