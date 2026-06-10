@@ -24,9 +24,10 @@ export async function registerEntryRoutes(app: FastifyInstance): Promise<void> {
 
       try {
         const entry = await client.getEntry(decodedDn);
+        const { rawAttributes, ...entryData } = entry;
         reply.code(200).send({
           success: true,
-          data: entry,
+          data: entryData,
         });
       } finally {
         await client.destroy();
