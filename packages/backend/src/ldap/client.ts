@@ -253,7 +253,7 @@ export class LdapClient {
     const client = await this.pool.getConnection(this.bindDn, this.bindPassword);
 
     try {
-      return new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         const entries: LdapEntry[] = [];
         const searchOptions = {
           filter: params.filter,
@@ -329,7 +329,7 @@ export class LdapClient {
     const client = await this.pool.getConnection(this.bindDn, this.bindPassword);
 
     try {
-      return new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         // Normalize attributes to arrays
         const normalizedAttrs = Object.entries(attributes).map(([name, value]) => ({
           [name]: Array.isArray(value) ? value : [value],
@@ -366,7 +366,7 @@ export class LdapClient {
     const client = await this.pool.getConnection(this.bindDn, this.bindPassword);
 
     try {
-      return new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         const modifications: any[] = [];
 
         for (const [attrName, value] of Object.entries(changes)) {
@@ -412,7 +412,7 @@ export class LdapClient {
     const client = await this.pool.getConnection(this.bindDn, this.bindPassword);
 
     try {
-      return new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error('Delete operation timeout'));
         }, 5000);
@@ -441,7 +441,7 @@ export class LdapClient {
     const client = await this.pool.getConnection(this.bindDn, this.bindPassword);
 
     try {
-      return new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error('Rename operation timeout'));
         }, 5000);
@@ -559,6 +559,10 @@ export class LdapClient {
 
       if (message.includes('Already exists')) {
         return new LdapError('ENTRY_ALREADY_EXISTS', 'Entry already exists', 68);
+      }
+
+      if (message.includes('Insufficient Access') || error.name === 'InsufficientAccessRightsError') {
+        return new LdapError('INSUFFICIENT_ACCESS_RIGHTS', 'Insufficient Access Rights', 50);
       }
 
       return new LdapError(defaultCode, message, ldapCode);
