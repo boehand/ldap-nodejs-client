@@ -371,15 +371,20 @@ export class LdapClient {
 
         for (const [attrName, value] of Object.entries(changes)) {
           if (value === null) {
+            const attr = new LdapAttribute();
+            attr.type = attrName;
             modifications.push(new Change({
               operation: 'delete',
-              modification: new LdapAttribute({ type: attrName }),
+              modification: attr,
             }));
           } else {
             const attrValues = Array.isArray(value) ? value : [value];
+            const attr = new LdapAttribute();
+            attr.type = attrName;
+            attr.values = attrValues;
             modifications.push(new Change({
               operation: 'replace',
-              modification: new LdapAttribute({ type: attrName, values: attrValues }),
+              modification: attr,
             }));
           }
         }
