@@ -48,7 +48,7 @@ import { DN } from "../schema/schema";
 import Modal from "../ui/Modal.vue";
 import Alert from "../ui/Alert.vue";
 import NodeLabel from "../NodeLabel.vue";
-import { ldapApi } from "../../api/ldap-client";
+import { ldapApi, type TreeItem } from "../../api/ldap-client";
 
 const props = defineProps<{
   dn: string;

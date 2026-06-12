@@ -18,7 +18,7 @@
       <!-- Header -->
       <Header
         :show-menu-toggle="true"
-        :user-name="currentUser"
+        :user-name="currentUser || undefined"
         @toggle-sidebar="sidebarOpen = !sidebarOpen"
         @logout="authStore.logout()"
       />

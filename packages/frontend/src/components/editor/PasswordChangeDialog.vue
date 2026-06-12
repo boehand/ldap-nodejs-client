@@ -138,8 +138,13 @@ async function init() {
 }
 
 function focus() {
-  if (oldExists.value) old.value?.focus();
-  else changed.value?.focus();
+  if (oldExists.value) {
+    const el = old.value as any;
+    el?.focus?.();
+  } else {
+    const el = changed.value as any;
+    el?.focus?.();
+  }
 }
 
 // Verify an existing password
