@@ -1,6 +1,15 @@
 <template>
-  <div>
-    <v-list v-if="roots.length > 0" density="compact" nav>
+  <div class="space-y-1">
+    <!-- Loading State -->
+    <div v-if="loading" class="flex items-center justify-center py-8">
+      <div class="text-gray-500">
+        <div class="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+        <p class="text-sm">Loading directory...</p>
+      </div>
+    </div>
+
+    <!-- Tree Nodes -->
+    <div v-else-if="roots.length > 0" class="space-y-1">
       <tree-node
         v-for="node in roots"
         :key="node.dn"
@@ -10,13 +19,12 @@
         @select="selectNode"
         @load-children="loadChildren"
       />
-    </v-list>
+    </div>
 
-    <v-alert v-else-if="!loading" type="info" class="mt-4">
-      No directory entries found.
-    </v-alert>
-
-    <v-progress-linear v-if="loading" indeterminate class="mt-2"></v-progress-linear>
+    <!-- Empty State -->
+    <div v-else class="p-4 text-center">
+      <p class="text-sm text-gray-600">No directory entries found.</p>
+    </div>
   </div>
 </template>
 
