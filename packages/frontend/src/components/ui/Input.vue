@@ -1,5 +1,6 @@
 <template>
   <input
+    ref="inputEl"
     :type="type"
     :placeholder="placeholder"
     :disabled="disabled"
@@ -15,6 +16,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+
 export interface Props {
   type?: string;
   placeholder?: string;
@@ -22,6 +25,8 @@ export interface Props {
   disabled?: boolean;
   error?: boolean;
 }
+
+const inputEl = ref<HTMLInputElement>();
 
 withDefaults(defineProps<Props>(), {
   type: 'text',
@@ -33,4 +38,8 @@ withDefaults(defineProps<Props>(), {
 defineEmits<{
   'update:modelValue': [value: string];
 }>();
+
+defineExpose({
+  focus: () => inputEl.value?.focus(),
+});
 </script>
