@@ -156,6 +156,6 @@ async function toggle(item: Node) {
 
 <style scoped>
 .active {
-  @apply text-front font-bold;
+  @apply text-slate-900 font-bold;
 }
 </style>

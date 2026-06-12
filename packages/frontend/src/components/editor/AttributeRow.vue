@@ -374,12 +374,12 @@ async function doDeleteBlob(index: number) {
 
 <style scoped>
 div.optional span.oc {
-  @apply text-front/70;
+  @apply text-slate-500;
 }
 
 div.illegal,
 input.illegal {
-  @apply line-through text-danger;
+  @apply line-through text-red-600;
 }
 
 div.rdn span.oc,
@@ -400,7 +400,7 @@ input:disabled {
 }
 
 input.auto {
-  @apply text-primary;
+  @apply text-indigo-600;
 }
 
 div.rdn span.oc::after {
