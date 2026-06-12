@@ -1,20 +1,19 @@
 <template>
-  <div class="max-w-sm rounded overflow-hidden shadow-lg border border-front/20">
-    <slot name="header">
-      <div class="py-2 border-b border-front/20">
-        <strong class="pl-6">{{ title }}</strong>
-        <span class="control text-l float-right mr-2 pl-2" title="close" @click="emit('close')">⊗
-        </span>
-      </div>
-    </slot>
-    <div class="px-6 py-2">
-      <slot></slot>
+  <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+    <div v-if="$slots.header" class="px-4 py-3 border-b border-gray-200">
+      <slot name="header" />
+    </div>
+
+    <div class="p-4">
+      <slot />
+    </div>
+
+    <div v-if="$slots.footer" class="px-4 py-3 border-t border-gray-200 bg-gray-50">
+      <slot name="footer" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{ title: string }>();
-
-const emit = defineEmits<{ close: [] }>();
+// Pure presentational component with header, body, and footer slots
 </script>

@@ -1,19 +1,23 @@
 <template>
-  <div v-if="attr && shown" class="flex mx-4 space-x-4">
-    <div
-      :class="{ required: must, optional: may, rdn: isRdn, illegal: illegal }"
-      class="w-1/4"
-    >
-      <span
-        class="cursor-pointer oc"
-        :title="attr.desc"
-        @click="emit('show-attr', attr.name)"
-        >{{ attr.name }}</span
-      >
-      <i v-if="changed" class="fa text-emerald-700 ml-1 fa-check"></i>
+  <div v-if="attr && shown" class="flex flex-col space-y-2 py-3 border-b border-gray-200 last:border-b-0">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span
+          class="text-sm font-medium text-gray-900 cursor-pointer hover:text-indigo-600 transition-colors"
+          :title="attr.desc"
+          @click="emit('show-attr', attr.name)"
+        >
+          {{ attr.name }}
+        </span>
+        <!-- Badges for status -->
+        <span v-if="must" class="text-xs px-2 py-1 bg-indigo-100 text-indigo-800 rounded">Required</span>
+        <span v-else-if="may" class="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded">Optional</span>
+        <span v-if="isRdn" class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">RDN</span>
+        <span v-if="changed" class="text-xs px-2 py-1 bg-emerald-100 text-emerald-800 rounded">Modified</span>
+      </div>
     </div>
 
-    <div class="w-3/4">
+    <div class="space-y-2">
       <div v-for="(val, index) in values" :key="index">
         <span
           v-if="isStructural(val)"

@@ -1,28 +1,52 @@
 <template>
-  <modal title="Are you sure?" :open="modal == 'delete-entry'" :return-to="returnTo" cancel-classes="bg-primary/80"
-    ok-classes="bg-danger/80" @show="init" @shown="onShown" @ok="onOk" @cancel="emit('update:modal')">
-    <p class="strong">This action is irreversible.</p>
+  <Modal
+    :open="modal == 'delete-entry'"
+    :return-to="returnTo"
+    title="Delete Entry"
+    cancel-title="Cancel"
+    ok-title="Delete"
+    @show="init"
+    @shown="onShown"
+    @ok="onOk"
+    @cancel="emit('update:modal')"
+  >
+    <!-- Warning Alert -->
+    <Alert variant="error" class="mb-4">
+      <strong>This action is irreversible.</strong> The entry and all child nodes will be permanently deleted.
+    </Alert>
 
-    <div v-if="subtree.length">
-      <p class="text-danger mb-2">
-        The following child nodes will be also deleted:
+    <!-- Subtree Warning -->
+    <div v-if="subtree.length" class="space-y-3">
+      <p class="text-sm font-medium text-gray-900">
+        The following child nodes will also be deleted:
       </p>
-      <div v-for="node in subtree" :key="node.dn">
-        <span v-for="i in level(node)" class="ml-6" :key="i"></span>
-        <node-label dn="" :oc="node.structuralObjectClass">
-          {{ node.dn.split(",")[0] }}
-        </node-label>
+      <div class="max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-3 space-y-1">
+        <div
+          v-for="node in subtree"
+          :key="node.dn"
+          class="text-sm text-gray-700 flex items-center"
+          :style="{ paddingLeft: `${level(node) * 16}px` }"
+        >
+          <span class="text-gray-500 mr-2">•</span>
+          <NodeLabel :dn="node.dn" :oc="node.structuralObjectClass" />
+        </div>
       </div>
     </div>
 
-    <template #modal-ok> <i class="fa fa-trash-o fa-lg"></i> Delete </template>
-  </modal>
+    <!-- Confirmation -->
+    <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+      <p class="text-xs text-amber-800">
+        This action cannot be undone. Please ensure you have a backup before proceeding.
+      </p>
+    </div>
+  </Modal>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { DN } from "../schema/schema";
 import Modal from "../ui/Modal.vue";
+import Alert from "../ui/Alert.vue";
 import NodeLabel from "../NodeLabel.vue";
 import { ldapApi } from "../../api/ldap-client";
 

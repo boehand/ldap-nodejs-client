@@ -1,100 +1,152 @@
 <template>
-  <v-app>
-    <v-container class="fill-height">
-      <v-row align="center" justify="center">
-        <v-col cols="12" sm="8" md="6" lg="4">
-          <v-card class="elevation-12">
-            <v-toolbar color="primary" dark flat>
-              <v-toolbar-title>LDAP Login</v-toolbar-title>
-            </v-toolbar>
+  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+    <!-- Main Card -->
+    <div class="w-full max-w-md">
+      <!-- Logo/Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">LDAP UI</h1>
+        <p class="text-gray-600">Directory Management Console</p>
+      </div>
 
-            <v-card-text class="pt-8">
-              <v-form @submit.prevent="handleLogin">
-                <!-- LDAP URL Input -->
-                <v-text-field
-                  v-model="selectedUrl"
-                  label="LDAP Server URL"
-                  placeholder="ldap://localhost:389"
-                  type="url"
-                  required
-                  clearable
-                  class="mb-4"
-                ></v-text-field>
+      <!-- Login Card -->
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <!-- Card Header -->
+        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h2 class="text-lg font-semibold text-gray-900">Sign In</h2>
+        </div>
 
-                <!-- Or show URL list if exists -->
-                <v-select
-                  v-if="authStore.savedUrls.length > 0"
-                  v-model="selectedUrl"
-                  :items="authStore.savedUrls"
-                  label="Recent Servers"
-                  clearable
-                  class="mb-4"
-                ></v-select>
+        <!-- Card Body -->
+        <form @submit.prevent="handleLogin" class="p-6 space-y-4">
+          <!-- Error Alert -->
+          <div
+            v-if="authStore.error"
+            class="p-4 bg-red-50 border border-red-200 rounded-lg"
+          >
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-red-800">{{ authStore.error }}</p>
+              </div>
+              <button
+                type="button"
+                @click="authStore.error = null"
+                class="text-red-400 hover:text-red-600"
+              >
+                <span class="text-xl">×</span>
+              </button>
+            </div>
+          </div>
 
-                <!-- Base DN -->
-                <v-text-field
-                  v-model="baseDn"
-                  label="Base DN"
-                  placeholder="dc=example,dc=org"
-                  hint="Used to locate users when entering a simple username"
-                  persistent-hint
-                  clearable
-                  class="mb-4"
-                ></v-text-field>
+          <!-- LDAP Server URL -->
+          <div>
+            <label for="url" class="block text-sm font-medium text-gray-900 mb-1">
+              LDAP Server URL
+            </label>
+            <input
+              id="url"
+              v-model="selectedUrl"
+              type="url"
+              placeholder="ldap://localhost:389"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              required
+            />
+            <p class="mt-1 text-xs text-gray-500">e.g., ldap://ldap.example.com:389</p>
+          </div>
 
-                <!-- Username -->
-                <v-text-field
-                  v-model="username"
-                  label="Username"
-                  placeholder="test or uid=test,ou=people,dc=example,dc=org"
-                  required
-                  class="mb-4"
-                ></v-text-field>
+          <!-- Recent Servers Dropdown -->
+          <div v-if="authStore.savedUrls.length > 0">
+            <label for="recent" class="block text-sm font-medium text-gray-900 mb-1">
+              Or Select Recent Server
+            </label>
+            <select
+              id="recent"
+              v-model="selectedUrl"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="">-- Choose from recent --</option>
+              <option v-for="url in authStore.savedUrls" :key="url" :value="url">
+                {{ url }}
+              </option>
+            </select>
+          </div>
 
-                <!-- Password -->
-                <v-text-field
-                  v-model="password"
-                  label="Password"
-                  type="password"
-                  required
-                  class="mb-4"
-                ></v-text-field>
+          <!-- Base DN -->
+          <div>
+            <label for="baseDn" class="block text-sm font-medium text-gray-900 mb-1">
+              Base DN <span class="text-gray-500 font-normal">(Optional)</span>
+            </label>
+            <input
+              id="baseDn"
+              v-model="baseDn"
+              type="text"
+              placeholder="dc=example,dc=org"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <p class="mt-1 text-xs text-gray-500">Used to locate users when entering a simple username</p>
+          </div>
 
-                <!-- Error message -->
-                <v-alert
-                  v-if="authStore.error"
-                  type="error"
-                  class="mb-4"
-                  closable
-                  @click:close="authStore.error = null"
-                >
-                  {{ authStore.error }}
-                </v-alert>
+          <!-- Username -->
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-900 mb-1">
+              Username
+            </label>
+            <input
+              id="username"
+              v-model="username"
+              type="text"
+              placeholder="user or uid=user,ou=people,dc=example,dc=org"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              required
+            />
+          </div>
 
-                <!-- Submit button -->
-                <v-btn
-                  type="submit"
-                  color="primary"
-                  block
-                  :loading="authStore.loading"
-                  :disabled="!selectedUrl || !username || !password"
-                >
-                  Login
-                </v-btn>
-              </v-form>
-            </v-card-text>
+          <!-- Password -->
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-900 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              v-model="password"
+              type="password"
+              placeholder="Enter your password"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              required
+            />
+          </div>
 
-            <v-card-actions class="pt-0">
-              <v-spacer></v-spacer>
-              <span class="text-caption text-grey">
-                No credentials? Ask your LDAP administrator
-              </span>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-app>
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            :disabled="!selectedUrl || !username || !password || authStore.loading"
+            :class="[
+              'w-full py-2 px-4 rounded-lg font-medium transition-colors',
+              authStore.loading || !selectedUrl || !username || !password
+                ? 'bg-indigo-300 text-white cursor-not-allowed'
+                : 'bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800'
+            ]"
+          >
+            <span v-if="authStore.loading" class="inline-block">Signing in...</span>
+            <span v-else>Sign In</span>
+          </button>
+        </form>
+
+        <!-- Card Footer -->
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <p class="text-xs text-gray-600 text-center">
+            No credentials? Ask your LDAP administrator
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer Text -->
+      <p class="text-center text-sm text-gray-600 mt-6">
+        Secure LDAP Directory Management
+      </p>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -129,5 +181,3 @@ async function handleLogin() {
 }
 </script>
 
-<style scoped>
-</style>

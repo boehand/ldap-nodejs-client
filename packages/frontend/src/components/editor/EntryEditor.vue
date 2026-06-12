@@ -18,28 +18,46 @@
     <add-attribute-dialog v-model:modal="modal" :entry="entry" :attributes="attributes('may')" :return-to="focused"
       @ok="addAttribute" @show-modal="modal = $event" />
 
-    <nav class="flex justify-between mb-4 border-b border-front/20 bg-primary/70">
-      <div v-if="entry.isNew" class="py-2 ml-3">
-        <node-label :dn="entry.dn" :oc="structural" />
+    <!-- Header with Entry Name and Actions -->
+    <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+      <div class="flex-1">
+        <h2 class="text-lg font-semibold text-gray-900">
+          <node-label :dn="entry.dn" :oc="structural" />
+        </h2>
+        <p class="text-sm text-gray-600 mt-1">{{ entry.dn }}</p>
       </div>
-      <div v-else class="ml-2">
-        <dropdown-menu>
-          <template #button-content>
-            <node-label :dn="entry.dn" :oc="structural" />
-          </template>
-          <li @click="modal = 'new-entry'" role="menuitem">Add child…</li>
-          <li @click="modal = 'copy-entry'" role="menuitem">Copy…</li>
-          <li @click="modal = 'rename-entry'" role="menuitem">Rename…</li>
-          <li role="menuitem"><a :href="'api/ldif/' + entry.dn">Export</a></li>
-          <li @click="modal = 'delete-entry'" class="text-danger" role="menuitem">
+
+      <!-- Action Menu -->
+      <div class="flex items-center gap-2">
+        <dropdown-menu v-if="!entry.isNew" title="Actions">
+          <li @click="modal = 'new-entry'" role="menuitem" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+            Add child…
+          </li>
+          <li @click="modal = 'copy-entry'" role="menuitem" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+            Copy…
+          </li>
+          <li @click="modal = 'rename-entry'" role="menuitem" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+            Rename…
+          </li>
+          <li role="menuitem" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+            <a :href="'api/ldif/' + entry.dn">Export</a>
+          </li>
+          <li @click="modal = 'delete-entry'" role="menuitem" class="px-4 py-2 text-sm text-red-700 hover:bg-red-50 cursor-pointer border-t border-gray-200">
             Delete…
           </li>
         </dropdown-menu>
-      </div>
 
-      <div v-if="entry.isNew" class="control text-2xl mr-2" @click="modal = 'discard-entry'" title="close">⊗</div>
-      <div v-else class="control text-xl mr-2" title="close" @click="emit('update:activeDn')">⊗</div>
-    </nav>
+        <!-- Close Button -->
+        <button
+          @click="entry.isNew ? (modal = 'discard-entry') : emit('update:activeDn')"
+          class="text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
 
     <form id="entry" class="space-y-4 my-4" @submit.prevent="save" @reset="load(entry!.dn, undefined, undefined)"
       @focusin="onFocus">
@@ -49,22 +67,39 @@
         @show-modal="modal = $event" @show-attr="emit('show-attr', $event)" @show-oc="emit('show-oc', $event)" />
 
       <!-- Footer with buttons -->
-      <div class="flex ml-4 mt-2 space-x-4">
-        <div class="w-1/4"></div>
-        <div class="w-3/4 pl-4">
-          <div class="w-[90%] space-x-3">
-            <button type="submit" class="btn bg-primary/70" tabindex="0" accesskey="s" :disabled="invalid.length != 0">
-              Submit
-            </button>
-            <button type="reset" v-if="!entry.isNew" accesskey="r" tabindex="0" class="btn bg-secondary">
-              Reset
-            </button>
-            <button class="btn float-right bg-secondary" accesskey="a" tabindex="0" v-if="!entry.isNew"
-              @click.prevent="modal = 'add-attribute'">
-              Add attribute…
-            </button>
-          </div>
-        </div>
+      <div class="flex gap-3 justify-end pt-6 mt-6 border-t border-gray-200">
+        <button
+          type="reset"
+          v-if="!entry.isNew"
+          accesskey="r"
+          tabindex="0"
+          class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          Reset
+        </button>
+        <button
+          v-if="!entry.isNew"
+          @click.prevent="modal = 'add-attribute'"
+          accesskey="a"
+          tabindex="0"
+          class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          Add attribute…
+        </button>
+        <button
+          type="submit"
+          tabindex="0"
+          accesskey="s"
+          :disabled="invalid.length != 0"
+          :class="[
+            'px-4 py-2 rounded-md font-medium transition-colors',
+            invalid.length !== 0
+              ? 'bg-indigo-300 text-white cursor-not-allowed'
+              : 'bg-indigo-600 text-white hover:bg-indigo-700'
+          ]"
+        >
+          Save Changes
+        </button>
       </div>
     </form>
   </div>

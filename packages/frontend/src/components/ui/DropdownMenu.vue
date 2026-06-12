@@ -1,7 +1,8 @@
 <template>
-  <div class="relative inline-block text-left mx-1">
-    <span
-      class="inline-flex w-full py-2 select-none cursor-pointer"
+  <div class="relative inline-block text-left">
+    <button
+      type="button"
+      class="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
       :aria-expanded="open"
       aria-haspopup="true"
       @click.stop="open = !open"
@@ -10,10 +11,10 @@
         {{ title }}
       </slot>
       <svg
-        class="-mr-1 h-5 w-5 pt-1"
+        class="h-4 w-4 transition-transform"
+        :class="{ 'rotate-180': open }"
         viewBox="0 0 20 20"
         fill="currentColor"
-        :aria-hidden="!open"
       >
         <path
           fill-rule="evenodd"
@@ -21,17 +22,47 @@
           clip-rule="evenodd"
         />
       </svg>
-    </span>
-    <popover v-model:open="open">
-      <slot></slot>
-    </popover>
+    </button>
+
+    <Transition name="scale-dropdown">
+      <div
+        v-if="open"
+        class="absolute right-0 mt-2 min-w-max bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+        @click.stop="handleMenuClick"
+        @keydown.esc="open = false"
+      >
+        <ul class="py-1">
+          <slot></slot>
+        </ul>
+      </div>
+    </Transition>
+
+    <div v-if="open" class="fixed inset-0 z-40" @click="open = false" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import Popover from "./Popover.vue";
+import { ref } from 'vue';
 
 const open = ref(false);
 defineProps<{ title?: string }>();
+
+function handleMenuClick(event: Event) {
+  if ((event.target as HTMLElement).closest('li, button, a')) {
+    open.value = false;
+  }
+}
 </script>
+
+<style scoped>
+.scale-dropdown-enter-active,
+.scale-dropdown-leave-active {
+  transition: opacity 0.1s ease, transform 0.1s ease;
+}
+
+.scale-dropdown-enter-from,
+.scale-dropdown-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-4px);
+}
+</style>

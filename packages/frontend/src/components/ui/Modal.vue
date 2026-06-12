@@ -1,148 +1,111 @@
 <template>
-  <div>
-    <transition name="fade">
-      <div
-        v-if="open"
-        class="fixed w-full h-full top-0 left-0 z-20 bg-front/60 dark:bg-back/70"
-      />
-    </transition>
+  <Teleport to="body">
+    <Transition name="fade-modal" :appear="true">
+      <div v-if="open" class="fixed inset-0 bg-black/60 transition-opacity z-40" />
+    </Transition>
 
-    <transition
-      name="bounce"
-      @enter="emit('show')"
-      @after-enter="emit('shown')"
-      @leave="emit('hide')"
-      @after-leave="emit('hidden')"
-    >
+    <Transition name="scale-modal" :appear="true">
       <div
         v-if="open"
+        class="fixed inset-0 flex items-center justify-center z-50 p-4"
         @click.self="onCancel"
         @keydown.esc="onCancel"
-        class="fixed w-full h-full top-0 left-0 flex items-center justify-center z-30"
       >
-        <div
-          class="absolute max-h-full w-1/2 max-w-lg container text-front overflow-hidden rounded bg-back border border-front/40"
-        >
-          <div class="flex justify-between items-start">
-            <div class="max-h-full w-full divide-y divide-front/30">
-              <div
-                v-if="title"
-                class="flex justify-between items-center px-4 py-1"
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <!-- Header -->
+          <div v-if="title" class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">
+              <slot name="header">{{ title }}</slot>
+            </h2>
+            <button
+              type="button"
+              @click="onCancel"
+              class="text-gray-400 hover:text-gray-500 transition-colors"
+            >
+              <span class="text-2xl">×</span>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="px-6 py-4 space-y-4">
+            <slot />
+          </div>
+
+          <!-- Footer -->
+          <div v-if="!hideFooter" class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
+            <slot name="footer">
+              <button
+                type="button"
+                @click="onCancel"
+                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <h3 class="ui-modal-header text-xl font-bold leading-normal">
-                  <slot name="header">{{ title }}</slot>
-                </h3>
-
-                <div class="control text-xl" @click="onCancel" title="close">
-                  ⊗
-                </div>
-              </div>
-
-              <div class="ui-modal-body p-4 space-y-4">
-                <slot />
-              </div>
-
-              <div
-                v-show="!hideFooter"
-                class="ui-modal-footer flex justify-end w-full p-4 space-x-3"
+                <slot name="modal-cancel">{{ cancelTitle }}</slot>
+              </button>
+              <button
+                type="button"
+                @click.stop="onOk"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
               >
-                <slot name="footer">
-                  <button
-                    id="ui-modal-cancel"
-                    @click="onCancel"
-                    type="button"
-                    class="btn"
-                    :class="cancelClasses"
-                    tabindex="0"
-                  >
-                    <slot name="modal-cancel">{{ cancelTitle }}</slot>
-                  </button>
-                  <button
-                    id="ui-modal-ok"
-                    @click.stop="onOk"
-                    type="button"
-                    class="btn"
-                    :class="okClasses"
-                    tabindex="0"
-                  >
-                    <slot name="modal-ok">{{ okTitle }}</slot>
-                  </button>
-                </slot>
-              </div>
-            </div>
+                <slot name="modal-ok">{{ okTitle }}</slot>
+              </button>
+            </slot>
           </div>
         </div>
       </div>
-    </transition>
-  </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
 const props = defineProps({
-    title: { type: String, required: true },
-    open: { type: Boolean, required: true },
-    okTitle: { type: String, default: "OK" },
-    okClasses: { type: String, default: "bg-primary/80" },
-    cancelTitle: { type: String, default: "Cancel" },
-    cancelClasses: { type: String, default: "bg-secondary" },
-    hideFooter: { type: Boolean, default: false },
-    returnTo: String,
-  }),
-  emit = defineEmits<{
-    ok: [];
-    cancel: [];
-    show: [];
-    shown: [];
-    hide: [];
-    hidden: [];
-  }>();
+  title: { type: String },
+  open: { type: Boolean, required: true },
+  okTitle: { type: String, default: 'OK' },
+  cancelTitle: { type: String, default: 'Cancel' },
+  hideFooter: { type: Boolean, default: false },
+  returnTo: String,
+});
+
+const emit = defineEmits<{
+  ok: [];
+  cancel: [];
+  show: [];
+  shown: [];
+  hide: [];
+  hidden: [];
+}>();
 
 function onOk() {
-  if (props.open) emit("ok");
+  if (props.open) emit('ok');
 }
 
 function onCancel() {
   if (props.open) {
     if (props.returnTo) document.getElementById(props.returnTo)?.focus();
-    emit("cancel");
+    emit('cancel');
   }
 }
 </script>
 
-<style>
-.ui-modal-body label {
-  @apply block text-front/70;
+<style scoped>
+.fade-modal-enter-active,
+.fade-modal-leave-active {
+  transition: opacity 0.2s ease;
 }
 
-.ui-modal-body input,
-.ui-modal-body textarea,
-.ui-modal-body select {
-  @apply w-full border border-front/20 rounded p-2 mt-1 outline-none focus:border-primary text-front bg-gray-200/80 dark:bg-gray-800/80;
+.fade-modal-enter-from,
+.fade-modal-leave-to {
+  opacity: 0;
 }
 
-.ui-modal-footer button {
-  min-width: 5rem;
+.scale-modal-enter-active,
+.scale-modal-leave-active {
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.bounce-enter-active {
-  animation: bounce-in 0.5s;
-}
-
-.bounce-leave-active {
-  animation: bounce-in 0.5s reverse;
-}
-
-@keyframes bounce-in {
-  0% {
-    transform: scale(0);
-  }
-
-  50% {
-    transform: scale(1.15);
-  }
-
-  100% {
-    transform: scale(1);
-  }
+.scale-modal-enter-from,
+.scale-modal-leave-to {
+  transform: scale(0.95);
+  opacity: 0;
 }
 </style>
