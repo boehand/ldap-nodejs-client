@@ -17,12 +17,12 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@headlessui/vue": "^2.1.x",
+    "@heroicons/vue": "^2.2.x",
     "@vueuse/core": "11.x",
+    "clsx": "^2.x",
     "pinia": "2.x",
-    "font-awesome": "4.7.x",
-    "vue": "3.5.x",
-    "vuetify": "3.7.x",
-    "@mdi/js": "7.4.x"
+    "vue": "3.5.x"
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.50.x",
@@ -38,12 +38,13 @@
     "eslint": "8.x",
     "eslint-plugin-vue": "9.x",
     "npm-run-all2": "6.x",
+    "postcss": "^8.x",
     "prettier": "3.x",
     "tailwindcss": "3.4.x",
+    "tailwind-merge": "^2.x",
     "typescript": "5.x",
     "vite": "5.x",
     "vite-plugin-compression": "0.5.x",
-    "vite-plugin-vuetify": "2.x",
     "vitest": "1.x",
     "vue-tsc": "2.x"
   },

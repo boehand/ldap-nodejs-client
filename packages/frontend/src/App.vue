@@ -1,55 +1,69 @@
 <template>
-  <v-app>
-    <!-- Login View -->
-    <login-view v-if="!authStore.isAuthenticated" />
+  <div v-if="!authStore.isAuthenticated" class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <LoginView />
+  </div>
 
-    <!-- Main App -->
-    <template v-else>
-      <v-app-bar color="primary" dark>
-        <v-app-bar-title>LDAP UI</v-app-bar-title>
-        <v-spacer></v-spacer>
-        <v-menu>
-          <template #activator="{ props }">
-            <v-btn icon v-bind="props">
-              <v-icon>mdi-account</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item title="Logout" @click="authStore.logout"></v-list-item>
-          </v-list>
-        </v-menu>
-      </v-app-bar>
+  <div v-else class="flex h-screen bg-gray-50">
+    <!-- Sidebar Navigation -->
+    <Sidebar
+      :is-open="sidebarOpen"
+      :active-item="activeNavItem"
+      @toggle="sidebarOpen = !sidebarOpen"
+      @navigate="activeNavItem = $event"
+      @logout="authStore.logout()"
+    />
 
-      <v-container fluid class="d-flex" style="height: calc(100vh - 64px)">
-        <!-- Left sidebar: Tree navigation -->
-        <v-navigation-drawer class="mr-4" width="300">
-          <v-list>
-            <v-list-item title="Directory Tree" prepend-icon="mdi-folder-tree">
-            </v-list-item>
-          </v-list>
-          <v-divider></v-divider>
-          <tree-explorer @select-dn="activeDn = $event" />
-        </v-navigation-drawer>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col md:ml-64">
+      <!-- Header -->
+      <Header
+        :show-menu-toggle="true"
+        :user-name="currentUser"
+        @toggle-sidebar="sidebarOpen = !sidebarOpen"
+        @logout="authStore.logout()"
+      />
 
-        <!-- Main content: Entry editor -->
-        <v-main>
-          <entry-editor :active-dn="activeDn" @update:active-dn="activeDn = $event" />
-        </v-main>
-      </v-container>
-    </template>
-  </v-app>
+      <!-- Main Area -->
+      <main class="flex-1 overflow-hidden flex">
+        <!-- Tree Explorer Sidebar -->
+        <div class="hidden lg:block w-80 border-r border-gray-200 bg-white overflow-y-auto">
+          <div class="p-4">
+            <h3 class="text-sm font-semibold text-gray-900 mb-4">Directory Tree</h3>
+            <TreeExplorer @select-dn="activeDn = $event" />
+          </div>
+        </div>
+
+        <!-- Entry Editor -->
+        <div class="flex-1 overflow-y-auto">
+          <EntryEditor :active-dn="activeDn" @update:active-dn="activeDn = $event" />
+        </div>
+      </main>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useAuthStore } from './stores/auth';
+import { getWhoAmI } from './generated/sdk.gen';
 import LoginView from './views/LoginView.vue';
+import Sidebar from './components/layout/Sidebar.vue';
+import Header from './components/layout/Header.vue';
 import TreeExplorer from './components/TreeExplorer.vue';
 import EntryEditor from './components/editor/EntryEditor.vue';
 
 const authStore = useAuthStore();
 const activeDn = ref<string>();
+const sidebarOpen = ref(false);
+const activeNavItem = ref('directory');
+const currentUser = ref<string | null>(null);
+
+onMounted(async () => {
+  try {
+    currentUser.value = await getWhoAmI();
+  } catch (e) {
+    currentUser.value = 'User';
+  }
+});
 </script>
 
-<style scoped>
-</style>

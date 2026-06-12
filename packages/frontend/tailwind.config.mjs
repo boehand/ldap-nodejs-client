@@ -1,12 +1,3 @@
-function withOpacityValue(variable) {
-  return ({ opacityValue }) => {
-    if (opacityValue === undefined) {
-      return `rgb(var(${variable}))`
-    }
-    return `rgb(var(${variable}) / ${opacityValue})`
-  }
-}
-
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -16,13 +7,74 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: withOpacityValue('--color-primary'),
-        back: withOpacityValue('--color-back'),
-        danger: withOpacityValue('--color-danger'),
-        front: withOpacityValue('--color-front'),
-        secondary: withOpacityValue('--color-secondary'),
-      }
+        slate: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
+        },
+      },
+      fontSize: {
+        xs: ['12px', '16px'],
+        sm: ['14px', '20px'],
+        base: ['16px', '24px'],
+        lg: ['18px', '28px'],
+        xl: ['20px', '28px'],
+        '2xl': ['24px', '32px'],
+        '3xl': ['30px', '36px'],
+      },
+      spacing: {
+        0: '0px',
+        1: '4px',
+        2: '8px',
+        3: '12px',
+        4: '16px',
+        5: '20px',
+        6: '24px',
+        7: '28px',
+        8: '32px',
+        9: '36px',
+        10: '40px',
+        12: '48px',
+        16: '64px',
+        20: '80px',
+        24: '96px',
+      },
+      borderRadius: {
+        none: '0px',
+        sm: '4px',
+        md: '6px',
+        lg: '8px',
+        xl: '12px',
+        full: '9999px',
+      },
+      boxShadow: {
+        none: 'none',
+        sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+      },
+      transitionDuration: {
+        150: '150ms',
+        200: '200ms',
+        300: '300ms',
+      },
+    },
+    fontFamily: {
+      sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+      mono: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
     },
   },
   plugins: [],
+  corePlugins: {
+    preflight: true,
+  },
 }
