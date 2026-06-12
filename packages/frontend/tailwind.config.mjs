@@ -7,6 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Legacy semantic tokens mapped to the modern palette so existing
+        // `<style>` blocks and templates resolve to the new design.
+        // `<alpha-value>` keeps opacity modifiers (e.g. bg-primary/70) working.
+        front: 'rgb(15 23 42 / <alpha-value>)', // slate-900 — primary text
+        back: 'rgb(255 255 255 / <alpha-value>)', // white — surfaces
+        primary: 'rgb(79 70 229 / <alpha-value>)', // indigo-600 — actions
+        secondary: 'rgb(100 116 139 / <alpha-value>)', // slate-500 — muted
+        danger: 'rgb(220 38 38 / <alpha-value>)', // red-600 — destructive
         slate: {
           50: '#f8fafc',
           100: '#f1f5f9',
